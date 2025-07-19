@@ -19,10 +19,22 @@
         :key="chat.id"
         class="chat-item"
         :class="{ active: currentChatId === chat.id }"
-        @click="selectChat(chat.id)"
       >
-        <div class="chat-title">{{ chat.title || '新的聊天' }}</div>
-        <div class="chat-time">{{ formatTime(chat.lastUpdated) }}</div>
+        <div class="chat-content" @click="selectChat(chat.id)">
+          <div class="chat-title">{{ chat.title || '新的聊天' }}</div>
+          <div class="chat-time">{{ formatTime(chat.lastUpdated) }}</div>
+        </div>
+        <div class="chat-actions">
+          <el-button
+            class="delete-btn"
+            type="danger"
+            size="small"
+            circle
+            @click.stop="confirmDelete(chat.id)"
+          >
+            <i class="el-icon-delete">×</i>
+          </el-button>
+        </div>
       </div>
       
       <div v-if="chatSessions.length === 0" class="empty-state">
@@ -33,7 +45,8 @@
 </template>
 
 <script setup>
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
+import { ElMessageBox } from 'element-plus';
 
 const props = defineProps({
   chatSessions: {
@@ -46,7 +59,7 @@ const props = defineProps({
   }
 });
 
-const emit = defineEmits(['new-chat', 'select-chat']);
+const emit = defineEmits(['new-chat', 'select-chat', 'delete-chat']);
 
 const createNewChat = () => {
   emit('new-chat');
@@ -54,6 +67,25 @@ const createNewChat = () => {
 
 const selectChat = (chatId) => {
   emit('select-chat', chatId);
+};
+
+// 确认删除对话框
+const confirmDelete = (chatId) => {
+  ElMessageBox.confirm(
+    '确定要删除此聊天记录吗？此操作无法恢复。',
+    '删除确认',
+    {
+      confirmButtonText: '确定删除',
+      cancelButtonText: '取消',
+      type: 'warning',
+    }
+  )
+    .then(() => {
+      emit('delete-chat', chatId);
+    })
+    .catch(() => {
+      // 用户取消删除操作
+    });
 };
 
 // 格式化时间
@@ -103,12 +135,15 @@ const formatTime = (timestamp) => {
 }
 
 .chat-item {
-  padding: 12px 16px;
+  padding: 8px;
   border-radius: 8px;
   margin-bottom: 8px;
   cursor: pointer;
   transition: background-color 0.2s;
   position: relative;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .chat-item:hover {
@@ -117,6 +152,12 @@ const formatTime = (timestamp) => {
 
 .chat-item.active {
   background-color: var(--active-color, #e6f7ff);
+}
+
+.chat-content {
+  flex: 1;
+  min-width: 0;
+  padding: 4px 8px;
 }
 
 .chat-title {
@@ -130,6 +171,22 @@ const formatTime = (timestamp) => {
 .chat-time {
   font-size: 12px;
   color: var(--secondary-text-color, #999);
+}
+
+.chat-actions {
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.chat-item:hover .chat-actions {
+  opacity: 1;
+}
+
+.delete-btn {
+  min-height: 24px;
+  min-width: 24px;
+  font-size: 12px;
+  padding: 0;
 }
 
 .empty-state {

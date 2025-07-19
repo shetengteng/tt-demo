@@ -49,6 +49,33 @@ export function useMessageHandler() {
   const selectChat = (chatId) => {
     currentChatId.value = chatId;
   };
+  
+  // 删除聊天会话
+  const deleteChat = (chatId) => {
+    const index = chatSessions.value.findIndex(chat => chat.id === chatId);
+    
+    if (index !== -1) {
+      // 从列表中移除
+      chatSessions.value.splice(index, 1);
+      
+      // 如果删除的是当前选中的会话
+      if (currentChatId.value === chatId) {
+        // 如果还有其他会话，选择第一个
+        if (chatSessions.value.length > 0) {
+          currentChatId.value = chatSessions.value[0].id;
+        } else {
+          // 如果没有其他会话，创建一个新的
+          createNewChat();
+        }
+      }
+      
+      // 保存会话列表
+      saveChatSessions();
+      
+      // 提示删除成功
+      ElMessage.success('聊天记录已删除');
+    }
+  };
 
   // 保存所有聊天会话
   const saveChatSessions = () => {
@@ -292,6 +319,7 @@ export function useMessageHandler() {
     chatSessions,
     currentChatId,
     createNewChat,
-    selectChat
+    selectChat,
+    deleteChat
   };
 }

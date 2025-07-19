@@ -5,6 +5,7 @@
       :current-chat-id="currentChatId"
       @new-chat="createNewChat"
       @select-chat="selectChat"
+      @delete-chat="deleteChat"
       class="chat-sidebar"
     />
     <div class="chat-main">
@@ -35,7 +36,8 @@ const {
   chatSessions, 
   currentChatId, 
   createNewChat, 
-  selectChat
+  selectChat,
+  deleteChat
 } = useMessageHandler();
 </script>
 
