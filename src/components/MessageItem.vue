@@ -2,14 +2,21 @@
     <div class="user-message" v-if="msg.isUser">
         {{ msg.content }}
     </div>
+    <div class="system-message" v-else-if="msg.isSystem">
+        <MarkdownRenderer :content="msg.content" />
+    </div>
     <div class="ai-message-wrapper" v-else>
         <!-- 将图标移至消息外部 -->
         <FontAwesomeIcon :icon="faRobot" class="ai-icon" />
-        <div class="ai-message">
-            <MarkdownRenderer 
-                :content="msg.content" 
-                @content-rendered="notifyContentRendered" 
-            />
+        <div class="ai-message-content">
+            <!-- 添加模型信息显示 -->
+            <div v-if="msg.model" class="ai-model-info">{{ msg.model }}</div>
+            <div class="ai-message">
+                <MarkdownRenderer 
+                    :content="msg.content" 
+                    @content-rendered="notifyContentRendered" 
+                />
+            </div>
         </div>
     </div>
 </template>
@@ -48,6 +55,16 @@ const notifyContentRendered = () => {
     color: var(--user-text);
 }
 
+.system-message {
+    margin: 8px auto;
+    padding: 4px 8px;
+    max-width: 80%;
+    text-align: center;
+    color: var(--text-secondary-color, #666);
+    font-style: italic;
+    font-size: 0.9em;
+}
+
 .ai-message-wrapper {
     display: flex;
     gap: 12px;
@@ -62,9 +79,15 @@ const notifyContentRendered = () => {
     /* 轻微调整顶部对齐 */
 }
 
-.ai-name {
-    /* 移除垂直居中 */
-    margin-bottom: 6px;
+.ai-message-content {
+    display: flex;
+    flex-direction: column;
+}
+
+.ai-model-info {
+    font-size: 12px;
+    margin-bottom: 2px;
+    color: var(--text-secondary-color, #666);
     font-weight: 500;
 }
 

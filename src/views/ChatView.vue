@@ -4,7 +4,10 @@
       <MessageList :messages="messages"/>
     </div>
     <div class="input-wrapper">
-      <MessageInput @send-message="handleSendMessage"/>
+      <MessageInput 
+        @send-message="handleSendMessage"
+        @change-model="handleModelChange"
+      />
     </div>
   </div>
 </template>
@@ -14,9 +17,7 @@ import MessageList from '../components/MessageList.vue';
 import MessageInput from '../components/MessageInput.vue';
 import {useMessageHandler} from '../composables/useMessageHandler';
 
-const {handleSendMessage, messages, isMounted} = useMessageHandler();
-
-
+const {handleSendMessage, handleModelChange, messages, isMounted} = useMessageHandler();
 </script>
 
 <style>

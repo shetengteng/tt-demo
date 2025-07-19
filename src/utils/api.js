@@ -4,6 +4,9 @@ export const sendMessageToAI = async (message, onChunk, signal) => {
     throw new Error('未设置API密钥，请在设置中配置');
   }
 
+  // 获取用户选择的模型，默认为 deepseek-chat
+  const selectedModel = localStorage.getItem('selectedModel') || 'deepseek-chat';
+
   try {
     const response = await fetch('/api/v1/chat/completions', {
       signal,
@@ -15,7 +18,7 @@ export const sendMessageToAI = async (message, onChunk, signal) => {
         'Accept': 'text/event-stream'
       },
       body: JSON.stringify({
-        model: 'deepseek-chat',
+        model: selectedModel,
         messages: [{ role: 'user', content: message }],
         stream: true
       })
@@ -67,3 +70,10 @@ export const sendMessageToAI = async (message, onChunk, signal) => {
     throw new Error(error.response?.data?.error?.message || '请求失败，请检查API密钥或网络连接');
   }
 };
+
+// 添加可用模型列表
+export const availableModels = [
+  { value: 'deepseek-chat', label: 'DeepSeek Chat' },
+  { value: 'deepseek-coder', label: 'DeepSeek Coder' },
+  { value: 'deepseek-lite', label: 'DeepSeek Lite' }
+];
