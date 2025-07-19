@@ -27,6 +27,9 @@ const sendMessage = () => {
   display: flex;
   gap: 8px;
   padding: 16px;
+  width: 100%;
+  box-sizing: border-box;
+  background-color: var(--chat-bg-color, #ffffff);
 }
 
 .el-input {

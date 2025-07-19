@@ -13,7 +13,6 @@ import { useGlobalTheme } from '@/composables/useGlobalTheme';
 // 获取全局主题状态
 const { darkMode } = useGlobalTheme();
 
-
 // 创建markdown实例的函数
 const createMarkdownInstance = () => {
   return markdownIt({
@@ -63,6 +62,15 @@ const renderedMarkdown = computed(() => {
   const html = md.value.render(props.content);
   return DOMPurify.sanitize(html);
 });
+
+// 监听内容变化，通知父组件内容已更新
+const emit = defineEmits(['content-rendered']);
+
+watch(() => props.content, () => {
+  nextTick(() => {
+    emit('content-rendered');
+  });
+});
 </script>
 
 <style scoped>
@@ -70,14 +78,16 @@ const renderedMarkdown = computed(() => {
 .markdown-body {
   font-size: 14px;
   line-height: 1.6;
-  padding: 8px 12px;
+  padding: 8px 0;
   color: var(--text-color);
-  background-color: var(--chat-bg-color);
+  background-color: transparent;
+  overflow-y: visible; /* 移除内侧滚动条 */
 }
 
 /* 适配深色模式 */
 :deep(.markdown-body) {
   color: var(--text-color) !important;
+  background-color: transparent !important;
 }
 
 /* 更新代码块样式 */
@@ -87,6 +97,9 @@ const renderedMarkdown = computed(() => {
   margin: 8px 0;
   background-color: var(--code-bg);
   border: 1px solid var(--code-border);
+  overflow-x: auto; /* 允许代码块横向滚动 */
+  overflow-y: visible; /* 禁止代码块垂直滚动 */
+  max-width: 100%; /* 确保代码块不超出容器 */
 }
 
 /* 适配深色模式 */

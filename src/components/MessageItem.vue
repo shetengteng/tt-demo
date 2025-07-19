@@ -6,7 +6,10 @@
         <!-- 将图标移至消息外部 -->
         <FontAwesomeIcon :icon="faRobot" class="ai-icon" />
         <div class="ai-message">
-            <MarkdownRenderer :content="msg.content" />
+            <MarkdownRenderer 
+                :content="msg.content" 
+                @content-rendered="notifyContentRendered" 
+            />
         </div>
     </div>
 </template>
@@ -21,6 +24,14 @@ const props = defineProps({
         required: true
     }
 });
+
+// 定义事件
+const emit = defineEmits(['content-rendered']);
+
+// 当Markdown渲染完成时通知父组件
+const notifyContentRendered = () => {
+    emit('content-rendered');
+};
 </script>
 
 <style scoped>
