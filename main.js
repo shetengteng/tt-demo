@@ -12,7 +12,12 @@ function createWindow() {
     }
   });
 
-  mainWindow.loadFile('index.html');
+  // 在开发环境中加载 Vite 开发服务器
+  if (process.env.NODE_ENV === 'development') {
+    mainWindow.loadURL('http://localhost:5173');
+  } else {
+    mainWindow.loadFile('index.html');
+  }
   // 打开开发者工具
   // mainWindow.webContents.openDevTools();
 }

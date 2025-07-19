@@ -2,7 +2,7 @@
   <div class="settings-container">
     <el-card title="主题设置">
         <el-form-item label="深色模式">
-          <el-switch v-model="darkMode" @change="toggleTheme"></el-switch>
+          <el-switch v-model="darkMode"></el-switch>
         </el-form-item>
       </el-card>
 
@@ -25,12 +25,12 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch } from 'vue';
+import { ref, onMounted } from 'vue';
 import { ElMessage } from 'element-plus';
-import { useTheme } from '@/composables/useTheme';
+import { useGlobalTheme } from '@/composables/useGlobalTheme';
 
 const apiKey = ref('');
-const { darkMode, toggleTheme } = useTheme();
+const { darkMode } = useGlobalTheme();
 
 onMounted(() => {
   // 加载已保存的设置
