@@ -32,23 +32,28 @@
                     </div>
                 </div>
                 
-                <!-- 思考中提示 -->
-                <div v-if="msg.reasoningContent && !msg.reasoningComplete" class="thinking-indicator">
+                <!-- 思考中提示 (仅当思考中且还没有内容显示时) -->
+                <div v-if="msg.reasoningContent && !msg.reasoningComplete && !msg.contentStarted" class="thinking-indicator">
                     <span class="dot-1">.</span>
                     <span class="dot-2">.</span>
                     <span class="dot-3">.</span>
                     <span class="thinking-text">思考中</span>
                 </div>
                 
-                <!-- 最终答案 (只有在思考过程完成后才显示) -->
-                <div v-if="msg.reasoningComplete && msg.content" class="ai-message final-answer">
+                <!-- 显示回答内容 (无论思考过程是否完成，只要有内容就显示) -->
+                <div v-if="hasAnswer || msg.contentStarted" class="ai-message final-answer">
                     <div class="answer-header">
                         <FontAwesomeIcon :icon="faCheck" class="answer-icon" />
                         <h4>回答</h4>
+                        <div v-if="!msg.reasoningComplete" class="typing-indicator">
+                            <span class="typing-dot"></span>
+                            <span class="typing-dot"></span>
+                            <span class="typing-dot"></span>
+                        </div>
                     </div>
                     <div class="answer-body">
                         <MarkdownRenderer 
-                            :content="msg.content"
+                            :content="displayedAnswer"
                             @content-rendered="notifyContentRendered"
                         />
                     </div>
@@ -70,11 +75,24 @@
 import MarkdownRenderer from './MarkdownRenderer.vue';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import { faRobot, faLightbulb, faCheck } from '@fortawesome/free-solid-svg-icons';
+import { computed } from 'vue';
+
 const props = defineProps({
     msg: {
         type: Object,
         required: true
     }
+});
+
+// 计算属性：判断是否有任何回答内容可以显示
+const hasAnswer = computed(() => {
+    return props.msg.content || props.msg.tempContent;
+});
+
+// 计算属性：获取要显示的回答内容
+const displayedAnswer = computed(() => {
+    // 优先使用content（如果有），否则使用tempContent
+    return props.msg.content || props.msg.tempContent || '';
 });
 
 // 定义事件
@@ -245,5 +263,34 @@ const notifyContentRendered = () => {
 
 .dot-3 {
     animation-delay: 0.6s;
+}
+
+/* 输入指示器样式 */
+.typing-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    margin-left: 6px;
+}
+
+.typing-dot {
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background-color: #28a745;
+    animation: dotAnimation 1s infinite;
+    display: inline-block;
+}
+
+.typing-dot:nth-child(1) {
+    animation-delay: 0s;
+}
+
+.typing-dot:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.typing-dot:nth-child(3) {
+    animation-delay: 0.4s;
 }
 </style>

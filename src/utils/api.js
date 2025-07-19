@@ -44,8 +44,8 @@ export const sendMessageToAI = async (message, onChunk, signal) => {
     let buffer = '';
     
     // 推理模型的流程状态
-    let reasoningPhaseComplete = false;
-    let contentPhaseStarted = false;
+    let reasoningPhaseComplete = false; // 思考阶段是否完成
+    let contentPhaseStarted = false;   // 回答阶段是否开始
     
     while (true) {
       const { done, value } = await reader.read();
@@ -82,17 +82,19 @@ export const sendMessageToAI = async (message, onChunk, signal) => {
                 // 如果这是首次收到content内容，标记思考阶段结束
                 if (!contentPhaseStarted) {
                   contentPhaseStarted = true;
-                  reasoningPhaseComplete = true;
                   
-                  // 发送思考阶段完成的事件
+                  // 发送思考阶段结束的事件，但不立即设置reasoningPhaseComplete
+                  // 这样允许同时显示思考过程和内容，思考过程完全结束后再标记完成
                   onChunk({
-                    type: 'reasoning_complete',
+                    type: 'content_started',
                     content: ''
                   });
                 }
                 
                 const chunk = json.choices[0].delta.content || '';
                 finalContent += chunk;
+                
+                // 立即发送内容块，允许动态显示
                 onChunk({
                   type: 'content',
                   content: chunk
@@ -116,8 +118,9 @@ export const sendMessageToAI = async (message, onChunk, signal) => {
       }
     }
 
-    // 如果还没有触发思考阶段完成事件，在结束时触发
-    if (selectedModel === 'deepseek-reasoner' && !reasoningPhaseComplete) {
+    // 思考过程结束后再发送完成事件
+    if (selectedModel === 'deepseek-reasoner') {
+      reasoningPhaseComplete = true;
       onChunk({
         type: 'reasoning_complete',
         content: ''

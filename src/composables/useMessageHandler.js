@@ -101,8 +101,9 @@ export function useMessageHandler() {
         aiMsg = reactive({ 
           reasoningContent: '',  // 思考过程
           reasoningComplete: false, // 标记思考过程是否完成
-          tempContent: '',       // 临时存储最终答案
-          content: '',          // 最终答案（等思考过程完成后再填充）
+          tempContent: '',       // 临时存储动态显示的最终答案
+          content: '',          // 最终完整答案
+          contentStarted: false, // 标记是否开始接收答案内容
           isUser: false,
           model: currentModel.value,
           isReasoningModel: true
@@ -129,16 +130,14 @@ export function useMessageHandler() {
               // 思考过程内容
               aiMsg.reasoningContent += chunk.content;
             } else if (chunk.type === 'content') {
-              // 最终回答内容
+              // 实时显示最终回答内容
               aiMsg.tempContent += chunk.content;
+            } else if (chunk.type === 'content_started') {
+              // 标记已开始接收答案内容
+              aiMsg.contentStarted = true;
             } else if (chunk.type === 'reasoning_complete') {
-              // 思考过程已完成
+              // 标记思考过程已完成
               aiMsg.reasoningComplete = true;
-              
-              // 如果已经有收集到的答案内容，显示出来
-              if (aiMsg.tempContent) {
-                aiMsg.content = aiMsg.tempContent;
-              }
             }
           } else {
             // 处理普通模型的响应
@@ -147,11 +146,11 @@ export function useMessageHandler() {
         }
       }, controller.value.signal);
 
-      // 最终处理，确保设置了reasoningComplete和显示最终内容
+      // 最终处理，确保设置了reasoningComplete和保存最终内容
       if (isReasoningModel && isMounted.value) {
         // 标记思考过程完成
         aiMsg.reasoningComplete = true;
-        // 确保将临时存储的内容全部转移到最终内容
+        // 确保将临时存储的内容全部转移到最终内容，用于保存
         aiMsg.content = aiMsg.tempContent;
       }
 
@@ -160,7 +159,7 @@ export function useMessageHandler() {
         // 复制消息，保留所有属性，包括思考过程
         if (msg.isReasoningModel) {
           return {
-            content: msg.content,
+            content: msg.content || msg.tempContent, // 确保保存有内容的字段
             reasoningContent: msg.reasoningContent, // 保存思考过程
             isUser: msg.isUser,
             model: msg.model,
