@@ -10,8 +10,53 @@
         <FontAwesomeIcon :icon="faRobot" class="ai-icon" />
         <div class="ai-message-content">
             <!-- 添加模型信息显示 -->
-            <div v-if="msg.model" class="ai-model-info">{{ msg.model }}</div>
-            <div class="ai-message">
+            <div class="ai-model-info">
+                {{ msg.model }}
+                <span v-if="msg.isReasoningModel" class="reasoning-badge">推理模型</span>
+            </div>
+            
+            <!-- 推理模型：显示思考过程 + 最终答案 -->
+            <template v-if="msg.isReasoningModel">
+                <!-- 思考过程 -->
+                <div v-if="msg.reasoningContent" class="reasoning-content">
+                    <div class="reasoning-header">
+                        <FontAwesomeIcon :icon="faLightbulb" class="thinking-icon" />
+                        <h4>思考过程</h4>
+                    </div>
+                    <div class="reasoning-body">
+                        <MarkdownRenderer 
+                            :content="msg.reasoningContent"
+                            @content-rendered="notifyContentRendered"
+                            class="reasoning-text"
+                        />
+                    </div>
+                </div>
+                
+                <!-- 思考中提示 -->
+                <div v-if="msg.reasoningContent && !msg.reasoningComplete" class="thinking-indicator">
+                    <span class="dot-1">.</span>
+                    <span class="dot-2">.</span>
+                    <span class="dot-3">.</span>
+                    <span class="thinking-text">思考中</span>
+                </div>
+                
+                <!-- 最终答案 (只有在思考过程完成后才显示) -->
+                <div v-if="msg.reasoningComplete && msg.content" class="ai-message final-answer">
+                    <div class="answer-header">
+                        <FontAwesomeIcon :icon="faCheck" class="answer-icon" />
+                        <h4>回答</h4>
+                    </div>
+                    <div class="answer-body">
+                        <MarkdownRenderer 
+                            :content="msg.content"
+                            @content-rendered="notifyContentRendered"
+                        />
+                    </div>
+                </div>
+            </template>
+            
+            <!-- 普通模型：只显示内容 -->
+            <div v-else class="ai-message">
                 <MarkdownRenderer 
                     :content="msg.content" 
                     @content-rendered="notifyContentRendered" 
@@ -24,7 +69,7 @@
 <script setup>
 import MarkdownRenderer from './MarkdownRenderer.vue';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
-import { faRobot } from '@fortawesome/free-solid-svg-icons';
+import { faRobot, faLightbulb, faCheck } from '@fortawesome/free-solid-svg-icons';
 const props = defineProps({
     msg: {
         type: Object,
@@ -68,7 +113,7 @@ const notifyContentRendered = () => {
 .ai-message-wrapper {
     display: flex;
     gap: 12px;
-    margin-bottom: 8px;
+    margin-bottom: 16px;
 }
 
 .ai-icon {
@@ -76,12 +121,14 @@ const notifyContentRendered = () => {
     height: 20px;
     color: var(--ai-icon-color);
     margin-top: 4px;
-    /* 轻微调整顶部对齐 */
+    flex-shrink: 0;
 }
 
 .ai-message-content {
     display: flex;
     flex-direction: column;
+    max-width: 85%;
+    gap: 12px;
 }
 
 .ai-model-info {
@@ -89,14 +136,114 @@ const notifyContentRendered = () => {
     margin-bottom: 2px;
     color: var(--text-secondary-color, #666);
     font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.reasoning-badge {
+    background-color: #e3f2fd;
+    color: #0078d4;
+    padding: 2px 6px;
+    border-radius: 10px;
+    font-size: 10px;
+    font-weight: bold;
 }
 
 .ai-message {
-    /* 移除原有的margin-bottom，由外层容器控制间距 */
-    padding: 8px 12px;
+    padding: 12px;
     border-radius: 12px;
-    max-width: fit-content;
+    max-width: 100%;
     background-color: var(--ai-bg);
     color: var(--ai-text);
+}
+
+/* 思考过程样式 */
+.reasoning-content {
+    background-color: rgba(0, 120, 212, 0.05);
+    border-radius: 8px;
+    padding: 1px 12px 12px;
+    border-left: 3px solid #0078d4;
+    margin-bottom: 8px;
+}
+
+.reasoning-text :deep(.markdown-body) {
+    font-size: 12px !important;
+    color: var(--text-secondary-color, #666) !important;
+    line-height: 1.5;
+}
+
+.reasoning-text :deep(pre),
+.reasoning-text :deep(code) {
+    font-size: 11px !important;
+}
+
+.reasoning-header, .answer-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+    margin-top: 8px;
+}
+
+.reasoning-header h4, .answer-header h4 {
+    margin: 0;
+    font-weight: 500;
+    font-size: 14px;
+}
+
+.thinking-icon {
+    color: #0078d4;
+}
+
+.answer-icon {
+    color: #28a745;
+}
+
+.final-answer {
+    background-color: var(--ai-bg);
+    border-left: 3px solid #28a745;
+}
+
+.answer-body, .reasoning-body {
+    margin-left: 24px;
+}
+
+/* 思考中指示器样式 */
+.thinking-indicator {
+    display: flex;
+    align-items: center;
+    margin: 8px 0;
+    color: #0078d4;
+    font-weight: 500;
+}
+
+.thinking-text {
+    margin-left: 4px;
+}
+
+@keyframes dotAnimation {
+    0% { opacity: 0.3; }
+    50% { opacity: 1; }
+    100% { opacity: 0.3; }
+}
+
+.dot-1, .dot-2, .dot-3 {
+    font-size: 24px;
+    line-height: 10px;
+    animation: dotAnimation 1.5s infinite;
+    display: inline-block;
+}
+
+.dot-1 {
+    animation-delay: 0s;
+}
+
+.dot-2 {
+    animation-delay: 0.3s;
+}
+
+.dot-3 {
+    animation-delay: 0.6s;
 }
 </style>

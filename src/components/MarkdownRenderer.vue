@@ -15,11 +15,14 @@ const { darkMode } = useGlobalTheme();
 
 // 创建markdown实例的函数
 const createMarkdownInstance = () => {
-  return markdownIt({
+  const md = markdownIt({
     html: true,
     linkify: true,
-    typographer: true
+    typographer: true,
+    breaks: true
   }).use(markdownItHighlightjs);
+  
+  return md;
 };
 
 // 响应式的markdown实例
@@ -47,7 +50,6 @@ onMounted(async () => {
   await loadTheme(darkMode.value);
 });
 
-
 const props = defineProps({
   content: {
     type: String,
@@ -59,7 +61,7 @@ const props = defineProps({
 // 计算属性：处理 Markdown 渲染和 XSS 净化
 const renderedMarkdown = computed(() => {
   if (!props.content) return '';
-  const html = md.value.render(props.content);
+  let html = md.value.render(props.content);
   return DOMPurify.sanitize(html);
 });
 
@@ -72,6 +74,29 @@ watch(() => props.content, () => {
   });
 });
 </script>
+
+<style>
+/* 全局覆盖一些github-markdown-css的默认样式 */
+.markdown-body {
+  font-size: 14px;
+  line-height: 1.6;
+  padding: 8px 0;
+  color: var(--text-color);
+  background-color: transparent !important;
+  overflow-y: visible !important; /* 移除内侧滚动条 */
+}
+
+.markdown-body code,
+.markdown-body tt {
+  white-space: pre-wrap;
+}
+
+.markdown-body pre {
+  margin: 8px 0;
+  padding: 8px;
+  border-radius: 4px;
+}
+</style>
 
 <style scoped>
 /* 自定义 Markdown 容器样式以适应聊天界面 */
