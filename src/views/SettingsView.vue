@@ -27,34 +27,16 @@
 <script setup>
 import { ref, onMounted, watch } from 'vue';
 import { ElMessage } from 'element-plus';
+import { useTheme } from '@/composables/useTheme';
 
 const apiKey = ref('');
-const darkMode = ref(false);
+const { darkMode, toggleTheme } = useTheme();
 
 onMounted(() => {
   // 加载已保存的设置
   const savedKey = localStorage.getItem('apiKey');
   if (savedKey) apiKey.value = savedKey;
-
-  const savedTheme = localStorage.getItem('darkMode');
-  if (savedTheme) {
-    darkMode.value = savedTheme === 'true';
-    applyTheme();
-  }
 });
-
-const applyTheme = () => {
-  if (darkMode.value) {
-    document.documentElement.classList.add('dark-theme');
-  } else {
-    document.documentElement.classList.remove('dark-theme');
-  }
-};
-
-const toggleTheme = () => {
-  localStorage.setItem('darkMode', darkMode.value);
-  applyTheme();
-};
 
 const saveApiKey = () => {
   if (!apiKey.value.trim()) {

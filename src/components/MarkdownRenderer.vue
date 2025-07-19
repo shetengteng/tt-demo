@@ -3,11 +3,13 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import {computed } from 'vue';
 import markdownIt from 'markdown-it';
 import DOMPurify from 'dompurify';
 import markdownItHighlightjs from 'markdown-it-highlightjs';
 import 'github-markdown-css';
+import 'highlight.js/styles/atom-one-light.css';
+// import 'highlight.js/styles/atom-one-dark.css';
 
 const props = defineProps({
   content: {
@@ -40,7 +42,7 @@ const renderedMarkdown = computed(() => {
   line-height: 1.6;
   padding: 8px 12px;
   color: var(--text-color);
-  background-color: var(--bg-color);
+  background-color: var(--chat-bg-color); /* 修改为对话框使用的背景色变量 */
 }
 
 /* 适配深色模式 */
@@ -48,10 +50,21 @@ const renderedMarkdown = computed(() => {
   color: var(--text-color) !important;
 }
 
-/* 代码块样式优化 */
-:deep(pre[class*="language-"]) {
+/* 更新代码块样式 */
+:deep(pre) {
   padding: 8px;
   border-radius: 4px;
   margin: 8px 0;
+  background-color: var(--code-bg);
+  border: 1px solid var(--code-border);
+}
+
+/* 适配深色模式 */
+.dark-theme :deep(pre) {
+  background-color: var(--card-bg);
+}
+
+:deep(code) {
+  background-color: transparent;
 }
 </style>
