@@ -1,12 +1,23 @@
-import { ref, reactive, onMounted, onUnmounted } from 'vue';
+import { ref, reactive, onMounted, onUnmounted, computed } from 'vue';
 import { sendMessageToAI, availableModels } from '../utils/api';
 import { ElMessage } from 'element-plus';
+import { v4 as uuidv4 } from 'uuid';
 
 export function useMessageHandler() {
-  const messages = ref([]);
+  // 所有聊天会话
+  const chatSessions = ref([]);
+  // 当前活动的聊天会话ID
+  const currentChatId = ref('');
+  
   const isMounted = ref(true);
   const controller = ref(new AbortController());
   const currentModel = ref('');
+
+  // 获取当前聊天会话的消息
+  const messages = computed(() => {
+    const currentChat = chatSessions.value.find(chat => chat.id === currentChatId.value);
+    return currentChat ? currentChat.messages : [];
+  });
 
   // 获取模型显示名称的函数
   const getModelDisplayName = (modelId) => {
@@ -14,28 +25,92 @@ export function useMessageHandler() {
     return model ? model.label : modelId;
   };
 
+  // 创建新的聊天会话
+  const createNewChat = () => {
+    const newChatId = uuidv4();
+    const newChat = {
+      id: newChatId,
+      title: '新的聊天',
+      messages: [],
+      createdAt: Date.now(),
+      lastUpdated: Date.now()
+    };
+    
+    chatSessions.value.unshift(newChat); // 添加到列表开头
+    currentChatId.value = newChatId; // 切换到新会话
+    
+    // 保存会话列表
+    saveChatSessions();
+    
+    return newChatId;
+  };
+
+  // 选择聊天会话
+  const selectChat = (chatId) => {
+    currentChatId.value = chatId;
+  };
+
+  // 保存所有聊天会话
+  const saveChatSessions = () => {
+    localStorage.setItem('chatSessions', JSON.stringify(chatSessions.value));
+  };
+
+  // 更新会话标题（根据第一条消息内容）
+  const updateChatTitle = (chatId, message) => {
+    const chat = chatSessions.value.find(chat => chat.id === chatId);
+    if (chat) {
+      // 使用用户第一条消息的前15个字符作为标题
+      if (chat.title === '新的聊天' && message.isUser) {
+        const title = message.content.substring(0, 15);
+        chat.title = title + (title.length >= 15 ? '...' : '');
+      }
+      
+      // 更新时间戳
+      chat.lastUpdated = Date.now();
+      
+      // 保存会话列表
+      saveChatSessions();
+    }
+  };
+
   onMounted(() => {
-    // 加载历史消息
+    // 加载会话列表
     try {
-      const savedMessages = localStorage.getItem('chatHistory');
-      if (savedMessages) {
-        const parsedMessages = JSON.parse(savedMessages);
+      const savedSessions = localStorage.getItem('chatSessions');
+      if (savedSessions) {
+        chatSessions.value = JSON.parse(savedSessions);
         
         // 确保加载的历史消息能正确显示思考过程
-        messages.value = parsedMessages.map(msg => {
-          // 对于带有思考过程的消息，确保设置正确的标志位
-          if (msg.reasoningContent && msg.isReasoningModel) {
-            return {
-              ...msg,
-              reasoningComplete: true // 确保历史记录中的消息显示为思考完成状态
-            };
-          }
-          return msg;
+        chatSessions.value.forEach(chat => {
+          chat.messages = chat.messages.map(msg => {
+            // 对于带有思考过程的消息，确保设置正确的标志位
+            if (msg.reasoningContent && msg.isReasoningModel) {
+              return {
+                ...msg,
+                reasoningComplete: true // 确保历史记录中的消息显示为思考完成状态
+              };
+            }
+            return msg;
+          });
         });
+        
+        // 如果有会话，选择最近更新的一个
+        if (chatSessions.value.length > 0) {
+          // 按最后更新时间排序
+          chatSessions.value.sort((a, b) => b.lastUpdated - a.lastUpdated);
+          currentChatId.value = chatSessions.value[0].id;
+        } else {
+          // 没有会话就创建一个新的
+          createNewChat();
+        }
+      } else {
+        // 没有保存的会话，创建新会话
+        createNewChat();
       }
     } catch (error) {
-      console.error('Failed to parse chat history:', error);
-      localStorage.removeItem('chatHistory'); // 清除损坏的历史数据
+      console.error('Failed to parse chat sessions:', error);
+      localStorage.removeItem('chatSessions'); // 清除损坏的数据
+      createNewChat(); // 创建新会话
     }
     
     // 获取当前选择的模型
@@ -59,16 +134,22 @@ export function useMessageHandler() {
     ElMessage.success(`已切换到 ${currentModel.value} 模型`);
     
     // 添加系统消息，表明模型已切换
-    if (isMounted.value) {
+    if (isMounted.value && currentChatId.value) {
       const systemMsg = { 
         content: `*系统: 已切换到 ${currentModel.value} 模型*`, 
         isUser: false,
         isSystem: true
       };
-      messages.value.push(systemMsg);
       
-      // 保存消息历史
-      localStorage.setItem('chatHistory', JSON.stringify(messages.value.map(msg => ({...msg}))));
+      // 找到当前会话并添加消息
+      const currentChat = chatSessions.value.find(chat => chat.id === currentChatId.value);
+      if (currentChat) {
+        currentChat.messages.push(systemMsg);
+        currentChat.lastUpdated = Date.now();
+        
+        // 保存会话
+        saveChatSessions();
+      }
     }
   };
 
@@ -78,14 +159,26 @@ export function useMessageHandler() {
     // 更新当前模型信息
     updateCurrentModel();
     
+    // 如果没有当前会话ID或者会话不存在，创建一个新的
+    if (!currentChatId.value || !chatSessions.value.find(chat => chat.id === currentChatId.value)) {
+      createNewChat();
+    }
+    
+    // 找到当前会话
+    const currentChat = chatSessions.value.find(chat => chat.id === currentChatId.value);
+    if (!currentChat) return;
+    
     // 添加用户消息
     const userMsg = { content: message, isUser: true };
     if (isMounted.value) {
-      messages.value.push(userMsg);
+      currentChat.messages.push(userMsg);
+      
+      // 更新会话标题（如果是第一条消息）
+      updateChatTitle(currentChatId.value, userMsg);
     }
 
     // 保存消息到本地存储
-    localStorage.setItem('chatHistory', JSON.stringify(messages.value.map(msg => ({...msg}))));
+    saveChatSessions();
 
     controller.value = new AbortController();
     try {
@@ -118,7 +211,9 @@ export function useMessageHandler() {
       }
       
       if (isMounted.value) {
-        messages.value.push(aiMsg);
+        currentChat.messages.push(aiMsg);
+        currentChat.lastUpdated = Date.now();
+        saveChatSessions();
       }
 
       // 调用AI API并传入流式回调和中止信号
@@ -143,6 +238,9 @@ export function useMessageHandler() {
             // 处理普通模型的响应
             aiMsg.content += chunk.content;
           }
+          
+          // 每收到新内容就保存
+          saveChatSessions();
         }
       }, controller.value.signal);
 
@@ -154,38 +252,46 @@ export function useMessageHandler() {
         aiMsg.content = aiMsg.tempContent;
       }
 
-      // 保存完整历史 (包括思考过程)
-      const historyMessages = messages.value.map(msg => {
-        // 复制消息，保留所有属性，包括思考过程
-        if (msg.isReasoningModel) {
-          return {
-            content: msg.content || msg.tempContent, // 确保保存有内容的字段
-            reasoningContent: msg.reasoningContent, // 保存思考过程
-            isUser: msg.isUser,
-            model: msg.model,
-            isReasoningModel: true,
-            reasoningComplete: true
-          };
-        } else {
-          return {...msg};
-        }
-      });
-      localStorage.setItem('chatHistory', JSON.stringify(historyMessages));
+      // 更新会话的最后更新时间并保存
+      if (currentChat) {
+        currentChat.lastUpdated = Date.now();
+        saveChatSessions();
+      }
     } catch (error) {
       if (error.name !== 'AbortError') {
         // 更新AI消息为错误内容
-        const aiMsg = messages.value[messages.value.length - 1];
-        if (aiMsg.isReasoningModel) {
-          aiMsg.content = `错误: ${error.message || '请求失败，请检查API密钥或网络连接'}`;
-        } else {
-          aiMsg.content = `错误: ${error.message || '请求失败，请检查API密钥或网络连接'}`;
+        const currentChat = chatSessions.value.find(chat => chat.id === currentChatId.value);
+        if (currentChat && currentChat.messages.length > 0) {
+          const aiMsg = currentChat.messages[currentChat.messages.length - 1];
+          if (!aiMsg.isUser) {
+            if (aiMsg.isReasoningModel) {
+              aiMsg.content = `错误: ${error.message || '请求失败，请检查API密钥或网络连接'}`;
+            } else {
+              aiMsg.content = `错误: ${error.message || '请求失败，请检查API密钥或网络连接'}`;
+            }
+            saveChatSessions();
+          }
         }
       } else if (isMounted.value) {
         // 请求中止时移除未完成的AI消息
-        messages.value.pop();
+        const currentChat = chatSessions.value.find(chat => chat.id === currentChatId.value);
+        if (currentChat && currentChat.messages.length > 0 && !currentChat.messages[currentChat.messages.length - 1].isUser) {
+          currentChat.messages.pop();
+          saveChatSessions();
+        }
       }
     }
   };
 
-  return { handleSendMessage, handleModelChange, messages, isMounted, currentModel };
+  return { 
+    handleSendMessage, 
+    handleModelChange, 
+    messages, 
+    isMounted, 
+    currentModel,
+    chatSessions,
+    currentChatId,
+    createNewChat,
+    selectChat
+  };
 }

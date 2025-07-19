@@ -1,13 +1,22 @@
 <template>
   <div class="chat-container" v-if="isMounted">
-    <div class="messages-wrapper">
-      <MessageList :messages="messages"/>
-    </div>
-    <div class="input-wrapper">
-      <MessageInput 
-        @send-message="handleSendMessage"
-        @change-model="handleModelChange"
-      />
+    <ChatSidebar 
+      :chat-sessions="chatSessions"
+      :current-chat-id="currentChatId"
+      @new-chat="createNewChat"
+      @select-chat="selectChat"
+      class="chat-sidebar"
+    />
+    <div class="chat-main">
+      <div class="messages-wrapper">
+        <MessageList :messages="messages"/>
+      </div>
+      <div class="input-wrapper">
+        <MessageInput 
+          @send-message="handleSendMessage"
+          @change-model="handleModelChange"
+        />
+      </div>
     </div>
   </div>
 </template>
@@ -15,9 +24,19 @@
 <script setup>
 import MessageList from '../components/MessageList.vue';
 import MessageInput from '../components/MessageInput.vue';
+import ChatSidebar from '../components/ChatSidebar.vue';
 import {useMessageHandler} from '../composables/useMessageHandler';
 
-const {handleSendMessage, handleModelChange, messages, isMounted} = useMessageHandler();
+const {
+  handleSendMessage, 
+  handleModelChange, 
+  messages, 
+  isMounted, 
+  chatSessions, 
+  currentChatId, 
+  createNewChat, 
+  selectChat
+} = useMessageHandler();
 </script>
 
 <style>
@@ -40,9 +59,19 @@ html, body {
 .chat-container {
   height: 100%;
   display: flex;
-  flex-direction: column;
   position: relative;
   overflow: hidden; /* 防止整个容器出现额外的滚动条 */
+}
+
+.chat-sidebar {
+  flex-shrink: 0;
+}
+
+.chat-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
 .messages-wrapper {
