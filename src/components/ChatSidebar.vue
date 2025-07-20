@@ -54,7 +54,7 @@
         <!--        </div>-->
 
         <!-- 主题切换图标 -->
-        <div class="sidebar-icon theme-toggle" @click="toggleTheme">
+        <div class="sidebar-icon theme-toggle" @click="handleThemeToggle">
           <i :class="themeIcon"></i>
         </div>
       </div>
@@ -84,6 +84,11 @@ const navigateTo = (path) => {
 const createNewChat = () => {
   // 模拟创建新聊天的操作
   router.push('/chat');
+};
+
+// 处理主题切换
+const handleThemeToggle = (event) => {
+  toggleTheme(event);
 };
 </script>
 

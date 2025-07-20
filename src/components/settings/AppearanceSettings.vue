@@ -8,7 +8,7 @@
       <div class="block-content">
         <div class="setting-item">
           <span class="setting-label">深色模式</span>
-          <el-switch v-model="darkModeValue" @change="toggleDarkMode"></el-switch>
+          <el-switch v-model="darkModeValue" @change="handleThemeToggle"></el-switch>
         </div>
       </div>
     </div>
@@ -72,8 +72,19 @@ onMounted(async () => {
 });
 
 // 切换暗黑模式
-const toggleDarkMode = async () => {
-  setTheme(darkModeValue.value);
+const handleThemeToggle = async (value) => {
+  // 获取开关元素的位置
+  const switchElement = document.querySelector('.el-switch');
+  if (switchElement) {
+    const rect = switchElement.getBoundingClientRect();
+    const event = {
+      currentTarget: switchElement
+    };
+    setTheme(value, event);
+  } else {
+    setTheme(value);
+  }
+  // 延迟保存设置，等待动画完成
   await saveSettingsToDb();
 };
 

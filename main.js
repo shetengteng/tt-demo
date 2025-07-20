@@ -1,7 +1,7 @@
-import { app, BrowserWindow, ipcMain } from 'electron';
+import { app, BrowserWindow } from 'electron';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { initDatabase, closeDatabase } from './src/composables/useDb.js';
+import { initDatabase, closeDatabase } from '@/composables/useDb.js';
 
 // 获取 __dirname 的 ES 模块替代品
 const __filename = fileURLToPath(import.meta.url);
