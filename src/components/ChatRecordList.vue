@@ -175,6 +175,14 @@ const getIconStyle = (chat) => {
     { bg: '#f3e8fd', text: '#9334e6' }, // 紫色
   ];
   
+  // 防御性检查：确保 chat 和 chat.id 不为空
+  if (!chat || !chat.id) {
+    return {
+      backgroundColor: colors[0].bg,
+      color: colors[0].text
+    };
+  }
+  
   // 根据聊天ID选择一个颜色
   const colorIndex = chat.id.charCodeAt(0) % colors.length;
   const color = colors[colorIndex];
