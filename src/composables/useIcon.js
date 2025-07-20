@@ -31,7 +31,16 @@ const iconMap = {
     edit: 'ri-edit-line',
     delete: 'ri-delete-bin-line',
     refresh: 'ri-refresh-line',
-    copy: 'ri-file-copy-line'
+    copy: 'ri-file-copy-line',
+    
+    // 设置页面图标
+    settings: 'ri-settings-3-line',
+    general: 'ri-dashboard-line',
+    key: 'ri-key-line',
+    theme: 'ri-palette-line',
+    info: 'ri-information-line',
+    user_plus: 'ri-user-add-line',
+    keyboard: 'ri-keyboard-line'
 };
 
 export function useIcon() {
