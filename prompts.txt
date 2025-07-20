@@ -1,0 +1,41 @@
+中文回答
+----------
+    <div class="settings-sidebar">
+          <div class="sidebar-title">
+            <i :class="getIconClass('settings')" class="sidebar-icon"></i>
+            <span>设置</span>
+          </div>
+          <div 
+            class="sidebar-item" 
+            :class="{ active: activeSection === 'general' }"
+            @click="activeSection = 'general'"
+          >
+            <i :class="getIconClass('general')" class="item-icon"></i>
+            <span>通用设置</span>
+          </div>
+          <div 
+            class="sidebar-item" 
+            :class="{ active: activeSection === 'api' }"
+            @click="activeSection = 'api'"
+          >
+            <i :class="getIconClass('key')" class="item-icon"></i>
+            <span>API 设置</span>
+          </div>
+          <div 
+            class="sidebar-item" 
+            :class="{ active: activeSection === 'appearance' }"
+            @click="activeSection = 'appearance'"
+          >
+            <i :class="getIconClass('theme')" class="item-icon"></i>
+            <span>外观设置</span>
+          </div>
+          <div 
+            class="sidebar-item" 
+            :class="{ active: activeSection === 'about' }"
+            @click="activeSection = 'about'"
+          >
+            <i :class="getIconClass('info')" class="item-icon"></i>
+            <span>关于</span>
+          </div>
+        </div>
+        这里可以优化成一个json配置

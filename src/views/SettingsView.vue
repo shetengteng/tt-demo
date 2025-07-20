@@ -9,37 +9,16 @@
             <i :class="getIconClass('settings')" class="sidebar-icon"></i>
             <span>设置</span>
           </div>
+          <!-- 使用sidebarItems配置动态生成侧边栏项 -->
           <div 
+            v-for="item in sidebarItems"
+            :key="item.section"
             class="sidebar-item" 
-            :class="{ active: activeSection === 'general' }"
-            @click="activeSection = 'general'"
+            :class="{ active: activeSection === item.section }"
+            @click="activeSection = item.section"
           >
-            <i :class="getIconClass('general')" class="item-icon"></i>
-            <span>通用设置</span>
-          </div>
-          <div 
-            class="sidebar-item" 
-            :class="{ active: activeSection === 'api' }"
-            @click="activeSection = 'api'"
-          >
-            <i :class="getIconClass('key')" class="item-icon"></i>
-            <span>API 设置</span>
-          </div>
-          <div 
-            class="sidebar-item" 
-            :class="{ active: activeSection === 'appearance' }"
-            @click="activeSection = 'appearance'"
-          >
-            <i :class="getIconClass('theme')" class="item-icon"></i>
-            <span>外观设置</span>
-          </div>
-          <div 
-            class="sidebar-item" 
-            :class="{ active: activeSection === 'about' }"
-            @click="activeSection = 'about'"
-          >
-            <i :class="getIconClass('info')" class="item-icon"></i>
-            <span>关于</span>
+            <i :class="getIconClass(item.icon)" class="item-icon"></i>
+            <span>{{ item.title }}</span>
           </div>
         </div>
       </el-splitter-panel>
@@ -93,6 +72,30 @@ const selectedModel = ref('deepseek-chat');
 const { darkMode } = useGlobalTheme();
 const activeSection = ref('general');
 const isMounted = ref(true);
+
+// 侧边栏JSON配置
+const sidebarItems = [
+  {
+    section: 'general',
+    title: '通用设置',
+    icon: 'general'
+  },
+  {
+    section: 'api',
+    title: 'API 设置',
+    icon: 'key'
+  },
+  {
+    section: 'appearance',
+    title: '外观设置',
+    icon: 'theme'
+  },
+  {
+    section: 'about',
+    title: '关于',
+    icon: 'info'
+  }
+];
 
 const sectionTitles = {
   general: '通用',
@@ -204,6 +207,7 @@ const handleApiSettingsSave = (settings) => {
   font-weight: 500;
   margin-bottom: 30px;
   color: var(--primary-text-color, #333);
+  padding-left: 60px; /* 添加左侧间距，与内容对齐 */
 }
 
 /* 自定义分隔条样式 */
