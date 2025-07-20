@@ -7,7 +7,15 @@
     </div>
     <div class="ai-message-wrapper" v-else>
         <!-- 将图标移至消息外部 -->
-        <i :class="getIconClass('robot')" class="ai-icon"></i>
+        <div class="ai-icon-wrapper">
+            <i :class="getIconClass('robot')" class="ai-icon"></i>
+            <!-- Loading动画 - 三个点闪动 -->
+            <div v-if="isLoading && !msg.content" class="loading-dots">
+                <span class="dot"></span>
+                <span class="dot"></span>
+                <span class="dot"></span>
+            </div>
+        </div>
         <div class="ai-message-content">
             <!-- 添加模型信息显示 -->
             <div class="ai-model-info">
@@ -82,6 +90,10 @@ const props = defineProps({
     msg: {
         type: Object,
         required: true
+    },
+    isLoading: {
+        type: Boolean,
+        default: false
     }
 });
 
@@ -135,13 +147,57 @@ const notifyContentRendered = () => {
     margin-bottom: 16px;
 }
 
+.ai-icon-wrapper {
+    position: relative;
+    margin-top: 4px;
+    flex-shrink: 0;
+}
+
 .ai-icon {
     width: 20px;
     height: 20px;
     color: var(--ai-icon-color);
-    margin-top: 4px;
-    flex-shrink: 0;
     font-size: 20px;
+}
+
+.loading-dots {
+    position: absolute;
+    top: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 2px;
+}
+
+.dot {
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background-color: #0078d4;
+    animation: dotBlink 1.4s infinite ease-in-out;
+}
+
+.dot:nth-child(1) {
+    animation-delay: -0.32s;
+}
+
+.dot:nth-child(2) {
+    animation-delay: -0.16s;
+}
+
+.dot:nth-child(3) {
+    animation-delay: 0s;
+}
+
+@keyframes dotBlink {
+    0%, 80%, 100% {
+        opacity: 0.3;
+        transform: scale(0.8);
+    }
+    40% {
+        opacity: 1;
+        transform: scale(1);
+    }
 }
 
 .ai-message-content {

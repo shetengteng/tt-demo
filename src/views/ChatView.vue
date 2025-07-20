@@ -11,7 +11,10 @@
       <el-splitter-panel>
         <div class="chat-main">
           <div class="messages-wrapper">
-            <MessageList :messages="messages"/>
+            <MessageList 
+              :messages="messages"
+              :is-loading="isLoading"
+            />
           </div>
           <div class="input-wrapper">
             <MessageInput 
@@ -33,7 +36,8 @@ import {
   handleSendMessage, 
   handleModelChange, 
   messages, 
-  isMounted
+  isMounted,
+  isLoading
 } from '../composables/useGlobalMessageHandler';
 </script>
 

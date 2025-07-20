@@ -24,6 +24,8 @@ export const currentModel = ref('');
 export const isDbReady = ref(false);
 // 初始化状态
 export const isInitialized = ref(false);
+// AI回复生成状态
+export const isLoading = ref(false);
 
 // ==================== 计算属性 ====================
 // 获取当前聊天会话的消息
@@ -243,6 +245,9 @@ export const handleModelChange = async (modelId) => {
 export const handleSendMessage = async (message) => {
     if (!message.trim() || !isDbReady.value) return;
 
+    // 设置loading状态
+    isLoading.value = true;
+
     // 更新当前模型信息
     updateCurrentModel();
 
@@ -381,7 +386,12 @@ export const handleSendMessage = async (message) => {
                 console.error('更新会话时间失败:', error);
             }
         }
+        
+        // 重置loading状态
+        isLoading.value = false;
     } catch (error) {
+        // 重置loading状态
+        isLoading.value = false;
         if (error.name !== 'AbortError') {
             // 更新AI消息为错误内容
             const currentChat = chatSessions.value.find(chat => chat.id === currentChatId.value);
@@ -437,6 +447,7 @@ export function useGlobalMessageHandler() {
         currentModel,
         isDbReady,
         isInitialized,
+        isLoading,
         messages,
 
         // 方法

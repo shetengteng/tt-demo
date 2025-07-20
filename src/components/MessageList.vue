@@ -5,8 +5,10 @@
         v-for="(msg, index) in messages"
         :key="index"
         :msg="msg"
+        :is-loading="isLoading"
         @content-rendered="scrollToBottom"
       />
+
     </div>
   </div>
 </template>
@@ -19,6 +21,10 @@ const props = defineProps({
   messages: {
     type: Array,
     required: true
+  },
+  isLoading: {
+    type: Boolean,
+    default: false
   }
 });
 
