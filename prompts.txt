@@ -1,10 +1,237 @@
-db.js:13 数据库初始化失败: TypeError: Cannot read properties of undefined (reading 'db')
-    at initDb (db.js:9:27)
-    at useMessageHandler.js:166:13
-    at chunk-XK54EQ6L.js?v=ce9a42bb:4931:40
-    at callWithErrorHandling (chunk-XK54EQ6L.js?v=ce9a42bb:2272:19)
-    at callWithAsyncErrorHandling (chunk-XK54EQ6L.js?v=ce9a42bb:2279:17)
-    at hook.__weh.hook.__weh (chunk-XK54EQ6L.js?v=ce9a42bb:4911:19)
-    at flushPostFlushCbs (chunk-XK54EQ6L.js?v=ce9a42bb:2457:28)
-    at flushJobs (chunk-XK54EQ6L.js?v=ce9a42bb:2499:5)
-还是报错
+任务背景-------
+下面是一个详细的规划和实现步骤，
+帮助你完成基于Electron + SQLite + DeepSeek API的本地知识库系统。
+我将从核心功能扩展、架构优化到具体实现进行拆解：
+
+---
+
+### **一、系统核心模块规划**
+#### 1. **知识存储模块**
+- **表结构设计** (SQLite)
+  ```sql
+  CREATE TABLE documents (
+      id INTEGER PRIMARY KEY,
+      title TEXT NOT NULL,        -- 文档标题
+      content TEXT NOT NULL,      -- 全文内容
+      embedding BLOB,             -- 向量嵌入（二进制存储）
+      file_path TEXT UNIQUE,      -- 原始文件路径
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  );
+
+  CREATE TABLE chunks (
+      id INTEGER PRIMARY KEY,
+      doc_id INTEGER REFERENCES documents(id),
+      text TEXT NOT NULL,         -- 分块文本
+      embedding BLOB NOT NULL,    -- 分块向量
+      page_number INTEGER         -- 可选：PDF页码
+  );
+  ```
+
+#### 2. **知识处理流程**
+   ```mermaid
+   graph LR
+   A[上传文件] --> B[文件解析]
+   B --> C[文本分块]
+   C --> D[生成向量]
+   D --> E[存储到SQLite]
+   E --> F[建立向量索引]
+   ```
+
+#### 3. **问答系统流程**
+   ```mermaid
+   graph LR
+   U[用户提问] --> V[问题向量化]
+   V --> W[向量相似度搜索]
+   W --> X[获取Top3知识片段]
+   X --> Y[构造Prompt]
+   Y --> Z[调用DeepSeek API]
+   Z --> 输出回答
+   ```
+
+---
+
+### **二、待实现关键功能清单**
+#### 1. **知识库管理**
+- **文件解析器**：
+  - 支持PDF（`pdfjs-dist`）、DOCX（`mammoth`）、TXT
+  - 示例代码：
+    ```javascript
+    // PDF解析示例
+    const pdfjs = await import('pdfjs-dist');
+    const doc = await pdfjs.getDocument(filePath).promise;
+    for (let i = 1; i <= doc.numPages; i++) {
+      const page = await doc.getPage(i);
+      const content = await page.getTextContent();
+      const text = content.items.map(item => item.str).join(' ');
+    }
+    ```
+
+- **文本分块**：
+  - 按固定长度分块（例如512字符）
+  - 使用`langchain-text-splitters`库实现语义分块
+
+#### 2. **向量引擎集成**
+- **嵌入生成**：
+  - 调用DeepSeek Embedding API（`text-embedding`模型）
+  - 本地缓存机制减少重复调用
+- **向量搜索**：
+  - 使用`sqlite-vss`扩展（需编译）
+  - 或纯JS方案：`hnswlib-node` + SQLite存储
+  ```javascript
+  // 相似度搜索示例
+  const results = await db.all(`
+    SELECT doc_id, text 
+    FROM chunks 
+    WHERE vss_search(embedding, vss_search_vector(?))
+    LIMIT 3
+  `, [queryVector]);
+  ```
+
+#### 3. **问答系统增强**
+- **Prompt工程**：
+  ```javascript
+  const prompt = `
+    基于以下知识：
+    ${contextSnippets.join('\n\n')}
+    
+    回答这个问题：
+    ${userQuestion}
+    
+    如果知识不足，回复“我不知道”。
+  `;
+  ```
+- **对话历史**：
+  - SQLite中新增`conversations`表存储历史
+  - 在prompt中注入最近3轮对话
+
+#### 4. **用户界面**
+- **Electron窗口**：
+  - 主窗口：聊天界面 + 侧边栏知识库管理
+  - 模态框：文件上传/配置API密钥
+- **关键组件**：
+  - 文件拖拽上传区
+  - 知识文档列表（带搜索）
+  - 对话历史面板
+
+#### 5. **配置管理**
+- `config.json`结构：
+  ```json
+  {
+    "apiKey": "sk-xxx",
+    "embeddingModel": "text-embedding",
+    "localModelPath": null,
+    "chunkSize": 512
+  }
+  ```
+- 通过`electron-store`持久化配置
+
+---
+
+### **三、技术栈升级建议**
+1. **向量搜索优化**：
+   - 优先使用`sqlite-vss`（性能最佳）
+   - 备选：`hnswlib-node` + SQLite Blob存储
+2. **本地模型支持**：
+   - 集成`TensorFlow.js`运行`MiniLM`等轻量嵌入模型
+   - 切换逻辑：
+     ```javascript
+     async function getEmbedding(text) {
+       if (config.useLocalModel) {
+         return localModel.embed(text);
+       } else {
+         return deepseekAPI.embed(text);
+       }
+     }
+     ```
+3. **安全增强**：
+   - 使用`electron-safe-storage`加密API密钥
+   - 文件上传大小限制（≤10MB）
+
+---
+
+### **四、开发里程碑计划**
+| 阶段 | 目标 | 耗时 |
+|------|------|------|
+| **1. 知识处理** | 完成文件解析+分块+向量存储 | 2天 |
+| **2. 向量搜索** | 实现SQLite向量检索（含索引） | 1.5天 |
+| **3. 问答集成** | 结合知识片段调用DeepSeek | 1天 |
+| **4. UI开发** | 构建Electron界面框架 | 2天 |
+| **5. 配置系统** | 实现设置面板+本地存储 | 1天 |
+| **6. 测试优化** | 性能测试+边界情况处理 | 1.5天 |
+
+---
+
+### **五、性能优化重点**
+1. **向量索引**：
+   - 分块后立即构建`IVF`索引（通过`sqlite-vss`）
+2. **缓存策略**：
+   - 最近使用文档的向量内存缓存（LRU策略）
+3. **批量处理**：
+   ```javascript
+   // 批量生成向量（减少API调用）
+   async function batchEmbed(texts) {
+     if (texts.length > 5) useLocalModel(); 
+     else return deepseekBatchAPI(texts);
+   }
+   ```
+4. **资源清理**：
+   - 定时删除未关联的向量片段
+
+---
+
+### **六、错误处理边界**
+1. **关键异常捕获点**：
+   - 文件解析失败（提供错误日志）
+   - API调用限流（自动退避重试）
+   - 向量维度不匹配（重建索引）
+2. **用户提示**：
+   - 上传文件格式错误
+   - 知识库为空时的问答降级处理
+   - SQLite存储空间不足
+
+---
+
+### **完整架构示意图**
+```mermaid
+graph TB
+  subgraph Electron Main Process
+    A[文件上传] --> B[文本解析器]
+    B --> C[分块处理器]
+    C --> D[向量生成器]
+    D --> E[SQLite]
+  end
+
+  subgraph Electron Renderer
+    F[聊天界面] --> G[提问处理器]
+    G --> H[向量搜索]
+    H --> I[DeepSeek API]
+    I --> J[显示回答]
+  end
+
+  E <--> H
+```
+
+按照这个规划，你可以逐步实现一个功能完备的本地知识库系统。核心注意点：**优先完成向量存储/检索链路**，这是知识库的基石。后续可扩展性考虑：未来可加入自动网页抓取、多用户支持等功能。
+
+
+---------
+当前任务
+- **表结构设计** (SQLite)
+  ```sql
+  CREATE TABLE documents (
+      id INTEGER PRIMARY KEY,
+      title TEXT NOT NULL,        -- 文档标题
+      content TEXT NOT NULL,      -- 全文内容
+      embedding BLOB,             -- 向量嵌入（二进制存储）
+      file_path TEXT UNIQUE,      -- 原始文件路径
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  );
+
+  CREATE TABLE chunks (
+      id INTEGER PRIMARY KEY,
+      doc_id INTEGER REFERENCES documents(id),
+      text TEXT NOT NULL,         -- 分块文本
+      embedding BLOB NOT NULL,    -- 分块向量
+      page_number INTEGER         -- 可选：PDF页码
+  );
+  ```

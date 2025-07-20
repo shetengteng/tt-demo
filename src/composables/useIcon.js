@@ -12,6 +12,13 @@ const iconMap = {
     calendar: 'ri-calendar-line',
     cog: 'ri-settings-3-line',
     user: 'ri-user-line',
+    database: 'ri-book-line', // 更改为书本图标
+    upload: 'ri-upload-line',
+    search: 'ri-search-line',
+    refresh: 'ri-refresh-line',
+    eye: 'ri-eye-line',
+    delete: 'ri-delete-bin-line',
+    more: 'ri-more-line',
     sun: 'ri-sun-line',
     moon: 'ri-moon-line',
     bard: 'ri-bard-line',
@@ -19,7 +26,7 @@ const iconMap = {
     // 聊天记录列表图标
     magic: 'ri-magic-line',
     star: 'ri-star-line',
-    dots: 'ri-more-2-fill',
+    dots: 'ri-more-2-line',
 
     // 消息相关图标
     robot: 'ri-robot-line',
@@ -29,8 +36,6 @@ const iconMap = {
     // 其他通用图标
     times: 'ri-close-line',
     edit: 'ri-edit-line',
-    delete: 'ri-delete-bin-line',
-    refresh: 'ri-refresh-line',
     copy: 'ri-file-copy-line',
     
     // 设置页面图标

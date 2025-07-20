@@ -1,7 +1,7 @@
 <template>
   <div class="chat-records">
     <!-- 新建聊天按钮 -->
-    <el-button class="new-chat-button" @click="createNewChat" type="primary">
+    <el-button class="new-chat-button" @click="createNewChat">
       <i :class="getIconClass('plus')" class="icon-margin-right"></i>
       <span style="margin-left: 10px;">New Chat</span>
       <i :class="getIconClass('bard')" style="margin-left: 10px;"></i>
@@ -236,10 +236,10 @@ const groupedChats = computed(() => {
 
 .new-chat-button {
   margin: 8px;
-  background-color: var(--new-chat-bg, #0078ff);
+  background-color: #000033;
   color: var(--new-chat-text, white);
   border: none;
-  border-radius: 20px;
+  border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -252,6 +252,30 @@ const groupedChats = computed(() => {
 
 .new-chat-button:hover {
   background-color: var(--new-chat-hover-bg, #0056cc);
+}
+
+/* 使用深度选择器确保Element UI按钮的hover样式被正确覆盖 */
+:deep(.new-chat-button:hover) {
+  background-color: #000066 !important;
+  border-color: #000066 !important;
+}
+
+:deep(.new-chat-button) {
+  background-color: #000033 !important;
+  border-color: #000033 !important;
+  color: white !important;
+}
+
+/* 深色主题下的按钮样式 */
+:deep(.dark-theme .new-chat-button) {
+  background-color: #4a82f0 !important;
+  border-color: #4a82f0 !important;
+  color: white !important;
+}
+
+:deep(.dark-theme .new-chat-button:hover) {
+  background-color: #3a72e0 !important;
+  border-color: #3a72e0 !important;
 }
 
 .icon-margin-right {
@@ -276,7 +300,7 @@ const groupedChats = computed(() => {
   flex: 1;
   overflow-y: auto;
   overflow-x: hidden; /* 隐藏横向滚动条 */
-  padding: 0 4px;
+  padding: 0 8px 0 0;
   width: 100%; /* 确保列表占满容器宽度 */
 }
 

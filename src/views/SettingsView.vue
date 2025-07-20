@@ -9,7 +9,6 @@
             <i :class="getIconClass('settings')" class="sidebar-icon"></i>
             <span>设置</span>
           </div>
-          <!-- 使用sidebarItems配置动态生成侧边栏项 -->
           <div 
             v-for="item in sidebarItems"
             :key="item.section"
@@ -27,17 +26,9 @@
       <el-splitter-panel>
         <div class="settings-content">
           <h1 class="content-title">{{ sectionTitles[activeSection] }}</h1>
-          
-          <!-- 通用设置区域 -->
           <GeneralSettings v-if="activeSection === 'general'" />
-
-          <!-- API 设置区域 -->
           <ApiSettings v-if="activeSection === 'api'" />
-
-          <!-- 外观设置区域 -->
           <AppearanceSettings v-if="activeSection === 'appearance'" />
-          
-          <!-- 关于区域 -->
           <AboutSettings v-if="activeSection === 'about'" />
         </div>
       </el-splitter-panel>
@@ -108,8 +99,6 @@ const sectionTitles = {
   overflow: hidden;
 }
 
-
-
 .sidebar-title {
   padding: 0 20px;
   margin-bottom: 16px;
@@ -173,7 +162,7 @@ const sectionTitles = {
 }
 
 /* 自定义分隔条样式 */
-:deep(.el-splitter__bar) {
+:deep(.el-splitter__bar::before) {
   background-color: var(--border-color, #e0e0e0);
 }
 

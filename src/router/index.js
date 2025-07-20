@@ -1,6 +1,7 @@
 import { createRouter, createWebHashHistory } from 'vue-router';
 import ChatView from '../views/ChatView.vue';
 import SettingsView from '../views/SettingsView.vue';
+import KnowledgeView from '../views/knowledge/index.vue';
 
 // 创建一个简单的空白组件用于暂未实现的功能
 const EmptyView = { 
@@ -11,6 +12,7 @@ const EmptyView = {
 const routes = [
   { path: '/', redirect: '/chat' },
   { path: '/chat', component: ChatView, name: 'Chat' },
+  { path: '/knowledge', component: KnowledgeView, name: 'Knowledge' },
   { path: '/settings', component: SettingsView, name: 'Settings' },
   { path: '/support', component: EmptyView, name: 'Support' },
   { path: '/actions', component: EmptyView, name: 'Actions' },

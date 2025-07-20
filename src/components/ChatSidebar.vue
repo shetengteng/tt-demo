@@ -17,6 +17,13 @@
           </div>
         </div>
 
+        <!-- 知识库图标 -->
+        <div class="sidebar-icon" :class="{ active: currentRoute === '/knowledge' }" @click="navigateTo('/knowledge')">
+          <div class="icon-bg">
+            <i :class="getIconClass('database')"></i>
+          </div>
+        </div>
+
         <!--        &lt;!&ndash; 耳机图标 &ndash;&gt;-->
         <!--        <div class="sidebar-icon" :class="{ active: currentRoute === '/support' }" @click="navigateTo('/support')">-->
         <!--          <i :class="getIconClass('headset')"></i>-->
