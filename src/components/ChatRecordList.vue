@@ -1,11 +1,11 @@
 <template>
   <div class="chat-records">
     <!-- 新建聊天按钮 -->
-    <div class="new-chat-button" @click="createNewChat">
-      <i :class="getIconClass('plus')"></i>
+    <el-button class="new-chat-button" @click="createNewChat" type="primary">
+      <i :class="getIconClass('plus')" class="icon-margin-right"></i>
       <span>New Chat</span>
       <i :class="getIconClass('magic')" class="magic-icon"></i>
-    </div>
+    </el-button>
     
     <div class="chat-list">
       <!-- 保存的聊天 -->
@@ -15,54 +15,65 @@
       </div>
       
       <!-- 按日期分组聊天列表 -->
-      <div v-for="(group, groupName) in groupedChats" :key="groupName">
-        <!-- 日期分组标题 -->
-        <div class="date-group">{{ groupName }}</div>
-        
-        <!-- 该分组下的聊天项目 -->
-        <div 
-          v-for="chat in group" 
-          :key="chat.id"
-          class="chat-item"
-          :class="{ active: currentChatId === chat.id }"
-          @click="selectChat(chat.id)"
+      <el-collapse v-model="activeGroups" class="custom-collapse">
+        <el-collapse-item 
+          v-for="(group, groupName) in groupedChats" 
+          :key="groupName"
+          :name="groupName"
+          :title="groupName"
+          class="date-group-item"
         >
-          <!-- 左侧图标，使用首字母或图标 -->
-          <div class="chat-icon" :style="getIconStyle(chat)">
-            <span>{{ getInitial(chat.title) }}</span>
-          </div>
-          
-          <!-- 中间内容 -->
-          <div class="chat-content">
-            <div class="chat-title">{{ chat.title || '新的聊天' }}</div>
-          </div>
-          
-          <!-- 右侧菜单 -->
-          <div class="chat-actions">
-            <i :class="getIconClass('dots')" class="menu-dots" @click.stop="showMenu(chat.id)"></i>
-          </div>
-          
-          <!-- 弹出菜单 -->
-          <div class="menu-popup" v-if="activeMenuId === chat.id" @click.stop>
-            <div class="menu-item rename" @click="renameChat(chat.id)">
-              <i :class="getIconClass('edit')" class="menu-icon"></i>
-              <span>重命名</span>
+          <!-- 该分组下的聊天项目 -->
+          <el-list class="chat-group-list">
+            <div 
+              v-for="chat in group" 
+              :key="chat.id"
+              class="chat-item"
+              :class="{ active: currentChatId === chat.id }"
+              @click="selectChat(chat.id)"
+            >
+              <!-- 左侧图标，使用首字母或图标 -->
+              <div class="chat-icon" :style="getIconStyle(chat)">
+                <span>{{ getInitial(chat.title) }}</span>
+              </div>
+              
+              <!-- 中间内容 -->
+              <div class="chat-content">
+                <div class="chat-title">{{ chat.title || '新的聊天' }}</div>
+              </div>
+              
+              <!-- 右侧菜单 -->
+              <el-dropdown 
+                @command="handleCommand($event, chat.id)" 
+                trigger="click" 
+                class="chat-actions"
+                @click.stop
+              >
+                <span class="el-dropdown-link">
+                  <i :class="getIconClass('dots')" class="menu-dots"></i>
+                </span>
+                <template #dropdown>
+                  <el-dropdown-menu>
+                    <el-dropdown-item command="rename">
+                      <i :class="getIconClass('edit')" class="menu-icon"></i>
+                      <span>重命名</span>
+                    </el-dropdown-item>
+                    <el-dropdown-item command="delete" divided>
+                      <i :class="getIconClass('delete')" class="menu-icon delete-icon"></i>
+                      <span class="delete-text">删除</span>
+                    </el-dropdown-item>
+                  </el-dropdown-menu>
+                </template>
+              </el-dropdown>
             </div>
-            <div class="menu-item delete" @click="confirmDelete(chat.id)">
-              <i :class="getIconClass('delete')" class="menu-icon delete-icon"></i>
-              <span>删除</span>
-            </div>
-          </div>
-        </div>
-      </div>
+          </el-list>
+        </el-collapse-item>
+      </el-collapse>
       
       <div v-if="chatSessions.length === 0" class="empty-state">
         暂无聊天记录
       </div>
     </div>
-    
-    <!-- 点击其他区域关闭菜单的遮罩 -->
-    <div class="menu-overlay" v-if="activeMenuId" @click="closeMenu"></div>
   </div>
 </template>
 
@@ -72,6 +83,9 @@ import { ElMessageBox, ElInput } from 'element-plus';
 import { useIcon } from '../composables/useIcon';
 
 const { getIconClass } = useIcon();
+
+// 保持所有折叠面板展开
+const activeGroups = ref(['今天', '昨天', '7 天内', '更早']);
 
 const props = defineProps({
   chatSessions: {
@@ -86,17 +100,13 @@ const props = defineProps({
 
 const emit = defineEmits(['new-chat', 'select-chat', 'delete-chat', 'rename-chat']);
 
-// 当前激活的菜单ID
-const activeMenuId = ref(null);
-
-// 显示或隐藏菜单
-const showMenu = (chatId) => {
-  activeMenuId.value = chatId;
-};
-
-// 关闭菜单
-const closeMenu = () => {
-  activeMenuId.value = null;
+// 处理下拉菜单命令
+const handleCommand = (command, chatId) => {
+  if (command === 'rename') {
+    renameChat(chatId);
+  } else if (command === 'delete') {
+    confirmDelete(chatId);
+  }
 };
 
 // 创建新聊天
@@ -128,11 +138,9 @@ const renameChat = (chatId) => {
   )
     .then(({ value }) => {
       emit('rename-chat', { id: chatId, title: value });
-      closeMenu();
     })
     .catch(() => {
       // 用户取消操作
-      closeMenu();
     });
 };
 
@@ -149,11 +157,9 @@ const confirmDelete = (chatId) => {
   )
     .then(() => {
       emit('delete-chat', chatId);
-      closeMenu();
     })
     .catch(() => {
       // 用户取消删除操作
-      closeMenu();
     });
 };
 
@@ -238,21 +244,26 @@ const groupedChats = computed(() => {
 
 .new-chat-button {
   margin: 8px;
-  padding: 10px 15px;
   background-color: #05101f;
   color: white;
+  border: none;
   border-radius: 20px;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  cursor: pointer;
+  width: calc(100% - 16px);
   transition: all 0.2s ease;
   font-weight: 500;
+  height: 40px;
 }
 
 .new-chat-button:hover {
   background-color: #122142;
+}
+
+.icon-margin-right {
+  margin-right: 0;
 }
 
 .magic-icon {
@@ -272,17 +283,34 @@ const groupedChats = computed(() => {
   font-size: 14px;
 }
 
-.date-group {
-  padding: 8px;
-  font-size: 12px;
-  color: var(--secondary-text-color, #999);
-  font-weight: 500;
-}
-
 .chat-list {
   flex: 1;
   overflow-y: auto;
   padding: 0 4px;
+}
+
+/* 自定义Element UI折叠面板样式 */
+.custom-collapse {
+  --el-collapse-header-height: 30px;
+  --el-collapse-header-bg-color: transparent;
+  --el-collapse-header-text-color: var(--secondary-text-color, #999);
+  --el-collapse-content-bg-color: transparent;
+  --el-collapse-border-color: transparent;
+}
+
+.date-group-item :deep(.el-collapse-item__header) {
+  font-size: 12px;
+  font-weight: 500;
+  padding: 0 8px;
+  color: var(--secondary-text-color, #999);
+}
+
+.date-group-item :deep(.el-collapse-item__content) {
+  padding: 0;
+}
+
+.chat-group-list {
+  padding: 0;
 }
 
 .chat-item {
@@ -342,56 +370,20 @@ const groupedChats = computed(() => {
   color: var(--secondary-text-color, #999);
   font-size: 16px;
   padding: 4px;
-}
-
-.menu-popup {
-  position: absolute;
-  top: 0;
-  right: 40px;
-  background-color: var(--bg-color, white);
-  border-radius: 8px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
-  z-index: 100;
-  overflow: hidden;
-  width: 140px;
-}
-
-.menu-item {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 12px;
   cursor: pointer;
-  transition: background-color 0.2s;
-}
-
-.menu-item:hover {
-  background-color: var(--hover-color, #f5f5f5);
 }
 
 .menu-icon {
-  font-size: 16px;
+  margin-right: 6px;
+  font-size: 14px;
 }
 
-.rename {
-  color: var(--text-color);
-}
-
-.delete {
+.delete-text {
   color: #ff4d4f;
 }
 
 .delete-icon {
   color: #ff4d4f;
-}
-
-.menu-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  z-index: 99;
 }
 
 .empty-state {

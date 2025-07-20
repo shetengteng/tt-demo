@@ -8,48 +8,51 @@
         <div class="sidebar-icon blue-circle">
           <div class="circle"></div>
         </div>
-        
+
         <!-- 聊天图标 - 确保这个是active的状态 -->
-        <div class="sidebar-icon" :class="{ active: currentRoute === '/' || currentRoute === '/chat' }" @click="navigateTo('/chat')">
+        <div class="sidebar-icon" :class="{ active: currentRoute === '/' || currentRoute === '/chat' }"
+             @click="navigateTo('/chat')">
           <div class="icon-bg">
             <i :class="getIconClass('message')"></i>
           </div>
         </div>
-        
-        <!-- 耳机图标 -->
-        <div class="sidebar-icon" :class="{ active: currentRoute === '/support' }" @click="navigateTo('/support')">
-          <i :class="getIconClass('headset')"></i>
-        </div>
-        
-        <!-- 闪电图标 -->
-        <div class="sidebar-icon" :class="{ active: currentRoute === '/actions' }" @click="navigateTo('/actions')">
-          <i :class="getIconClass('bolt')"></i>
-        </div>
-        
-        <!-- 加号图标 -->
-        <div class="sidebar-icon" @click="createNewChat">
-          <i :class="getIconClass('plus')"></i>
-        </div>
-        
-        <!-- 日历图标 -->
-        <div class="sidebar-icon" :class="{ active: currentRoute === '/calendar' }" @click="navigateTo('/calendar')">
-          <i :class="getIconClass('calendar')"></i>
-        </div>
-        
+
+        <!--        &lt;!&ndash; 耳机图标 &ndash;&gt;-->
+        <!--        <div class="sidebar-icon" :class="{ active: currentRoute === '/support' }" @click="navigateTo('/support')">-->
+        <!--          <i :class="getIconClass('headset')"></i>-->
+        <!--        </div>-->
+        <!--        -->
+        <!--        &lt;!&ndash; 闪电图标 &ndash;&gt;-->
+        <!--        <div class="sidebar-icon" :class="{ active: currentRoute === '/actions' }" @click="navigateTo('/actions')">-->
+        <!--          <i :class="getIconClass('bolt')"></i>-->
+        <!--        </div>-->
+        <!--        -->
+        <!--        &lt;!&ndash; 加号图标 &ndash;&gt;-->
+        <!--        <div class="sidebar-icon" @click="createNewChat">-->
+        <!--          <i :class="getIconClass('plus')"></i>-->
+        <!--        </div>-->
+        <!--        -->
+        <!--        &lt;!&ndash; 日历图标 &ndash;&gt;-->
+        <!--        <div class="sidebar-icon" :class="{ active: currentRoute === '/calendar' }" @click="navigateTo('/calendar')">-->
+        <!--          <i :class="getIconClass('calendar')"></i>-->
+        <!--        </div>-->
+
         <!-- 设置图标 -->
         <div class="sidebar-icon" :class="{ active: currentRoute === '/settings' }" @click="navigateTo('/settings')">
-          <i :class="getIconClass('cog')"></i>
+          <div class="icon-bg">
+            <i :class="getIconClass('cog')"></i>
+          </div>
         </div>
       </div>
-      
+
       <!-- 底部图标组 -->
       <div class="icon-group bottom">
-        <!-- 用户图标带New标记 -->
-        <div class="sidebar-icon" :class="{ active: currentRoute === '/profile' }" @click="navigateTo('/profile')">
-          <i :class="getIconClass('user')"></i>
-          <span class="new-badge">New</span>
-        </div>
-        
+        <!--        &lt;!&ndash; 用户图标带New标记 &ndash;&gt;-->
+        <!--        <div class="sidebar-icon" :class="{ active: currentRoute === '/profile' }" @click="navigateTo('/profile')">-->
+        <!--          <i :class="getIconClass('user')"></i>-->
+        <!--          <span class="new-badge">New</span>-->
+        <!--        </div>-->
+
         <!-- 主题切换图标 -->
         <div class="sidebar-icon theme-toggle" @click="toggleTheme">
           <i :class="themeIcon"></i>
@@ -60,14 +63,14 @@
 </template>
 
 <script setup>
-import { computed, ref } from 'vue';
-import { useGlobalTheme } from '../composables/useGlobalTheme';
-import { useRouter } from 'vue-router';
-import { useIcon } from '../composables/useIcon';
+import {computed} from 'vue';
+import {useGlobalTheme} from '../composables/useGlobalTheme';
+import {useRouter} from 'vue-router';
+import {useIcon} from '../composables/useIcon';
 
 const router = useRouter();
-const { toggleTheme, currentTheme } = useGlobalTheme();
-const { getIconClass, themeIcon } = useIcon();
+const {toggleTheme, currentTheme} = useGlobalTheme();
+const {getIconClass, themeIcon} = useIcon();
 
 // 获取当前路由
 const currentRoute = computed(() => router.currentRoute.value.path);
