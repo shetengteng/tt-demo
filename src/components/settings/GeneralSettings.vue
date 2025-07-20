@@ -112,4 +112,28 @@ const saveSettings = async () => {
 .right-button {
   margin-left: auto;
 }
+
+/* Element UI 主题适配 */
+:deep(.el-button--primary) {
+  background-color: var(--primary-color, #4a82f0);
+  border-color: var(--primary-color, #4a82f0);
+  color: white;
+}
+
+:deep(.el-button--primary:hover) {
+  background-color: var(--new-chat-hover-bg, #0056cc);
+  border-color: var(--new-chat-hover-bg, #0056cc);
+}
+
+/* Dark theme overrides */
+.dark-theme :deep(.el-button--primary) {
+  background-color: var(--primary-color, #4a82f0);
+  border-color: var(--primary-color, #4a82f0);
+  color: white;
+}
+
+.dark-theme :deep(.el-button--primary:hover) {
+  background-color: var(--new-chat-hover-bg, #3a72e0);
+  border-color: var(--new-chat-hover-bg, #3a72e0);
+}
 </style> 

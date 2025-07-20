@@ -93,7 +93,7 @@ const sectionTitles = {
 
 <style scoped>
 .settings-container {
-  height: 100%;
+  height: 100vh;
   display: flex;
   position: relative;
   overflow: hidden;
@@ -105,17 +105,10 @@ const sectionTitles = {
   background-color: var(--sidebar-bg-color, #f5f5f5);
   border-right: 1px solid var(--border-color, #d0d0d0);
   padding: 10px 0;
-  overflow-y: auto;
-  -ms-overflow-style: none;  /* IE and Edge */
-  scrollbar-width: none;  /* Firefox */
+  overflow: hidden;
 }
 
-/* 隐藏webkit浏览器的滚动条 */
-.settings-sidebar::-webkit-scrollbar {
-  display: none;
-  width: 0;
-  height: 0;
-}
+
 
 .sidebar-title {
   padding: 0 20px;
@@ -163,18 +156,13 @@ const sectionTitles = {
   height: 100%;
   width: 100%;
   padding: 30px;
-  overflow-y: auto;
+  overflow: hidden;
   background-color: var(--content-bg-color, #ffffff);
-  -ms-overflow-style: none;  /* IE and Edge */
-  scrollbar-width: none;  /* Firefox */
+  display: flex;
+  flex-direction: column;
 }
 
-/* 隐藏webkit浏览器的滚动条 */
-.settings-content::-webkit-scrollbar {
-  display: none;
-  width: 0;
-  height: 0;
-}
+
 
 .content-title {
   font-size: 28px;
@@ -193,15 +181,13 @@ const sectionTitles = {
   background-color: var(--primary-color, #4a82f0);
 }
 
-/* 全局滚动条隐藏，也影响到可能的嵌套元素 */
-:deep(*::-webkit-scrollbar) {
-  display: none;
-  width: 0;
-  height: 0;
+/* 确保splitter不会产生滚动条 */
+:deep(.el-splitter) {
+  height: 100%;
+  overflow: hidden;
 }
 
-:deep(*) {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
+:deep(.el-splitter-panel) {
+  overflow: hidden;
 }
 </style>

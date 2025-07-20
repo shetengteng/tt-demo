@@ -25,26 +25,26 @@
 }
 
 .dark-theme {
-  --bg-color: #1a1a1a;
-  --text-color: #ffffff;
-  --card-bg: #2d2d2d;
+  --bg-color: #2a2a2a;
+  --text-color: #d0d0d0;
+  --card-bg: #3a3a3a;
   --user-bg: #1a56db;
   --user-text: white;
-  --ai-bg: #2d2d2d;
-  --ai-text: #ffffff;
-  --code-bg: #2d2d2d;
-  --code-border: #444;
-  --sidebar-bg-color: #111111;
-  --border-color: #555555;
-  --icon-color: #aaaaaa;
+  --ai-bg: #3a3a3a;
+  --ai-text: #d0d0d0;
+  --code-bg: #3a3a3a;
+  --code-border: #555;
+  --sidebar-bg-color: #1f1f1f;
+  --border-color: #666666;
+  --icon-color: #a0a0a0;
   --primary-color: #4a82f0;
-  --hover-color: #333333;
-  --active-color: #003b70;
-  --secondary-text-color: #cccccc;
-  --chat-bg-color: #1a1a1a;
-  --content-bg-color: #1a1a1a;
-  --card-bg-color: #2d2d2d;
-  --primary-text-color: #ffffff;
+  --hover-color: #444444;
+  --active-color: #1a4a8a;
+  --secondary-text-color: #a0a0a0;
+  --chat-bg-color: #2a2a2a;
+  --content-bg-color: #2a2a2a;
+  --card-bg-color: #3a3a3a;
+  --primary-text-color: #d0d0d0;
   --new-chat-bg: #4a82f0;
   --new-chat-text: white;
   --new-chat-hover-bg: #3a72e0;

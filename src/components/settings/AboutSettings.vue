@@ -89,4 +89,22 @@ const { getIconClass } = useIcon();
 .icon-margin-right {
   margin-right: 4px;
 }
+
+/* Element UI 主题适配 */
+:deep(.el-button--primary) {
+  color: var(--primary-color, #4a82f0);
+}
+
+:deep(.el-button--primary:hover) {
+  color: var(--new-chat-hover-bg, #0056cc);
+}
+
+/* Dark theme overrides */
+.dark-theme :deep(.el-button--primary) {
+  color: var(--primary-color, #4a82f0);
+}
+
+.dark-theme :deep(.el-button--primary:hover) {
+  color: var(--new-chat-hover-bg, #3a72e0);
+}
 </style> 

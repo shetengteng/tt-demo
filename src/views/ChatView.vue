@@ -123,4 +123,31 @@ html, body {
 :deep(.el-splitter__bar:hover) {
   background-color: var(--primary-color, #4a82f0);
 }
+
+/* 自定义滚动条样式 */
+:deep(.message-list)::-webkit-scrollbar {
+  width: 6px;
+}
+
+:deep(.message-list)::-webkit-scrollbar-track {
+  background-color: transparent;
+}
+
+:deep(.message-list)::-webkit-scrollbar-thumb {
+  background-color: var(--border-color, #d0d0d0);
+  border-radius: 3px;
+}
+
+:deep(.message-list)::-webkit-scrollbar-thumb:hover {
+  background-color: var(--secondary-text-color, #999);
+}
+
+/* Dark theme scrollbar overrides */
+.dark-theme :deep(.message-list)::-webkit-scrollbar-thumb {
+  background-color: var(--border-color, #666666);
+}
+
+.dark-theme :deep(.message-list)::-webkit-scrollbar-thumb:hover {
+  background-color: var(--secondary-text-color, #a0a0a0);
+}
 </style>

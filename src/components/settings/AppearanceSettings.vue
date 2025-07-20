@@ -172,10 +172,54 @@ const saveSettingsToDb = async () => {
   font-size: 14px;
 }
 
-/* 深色模式按钮样式优化 */
-:deep(.dark-theme .el-button--default) {
-  background-color: var(--card-bg);
-  border-color: var(--border-color);
-  color: var(--text-color);
+/* Element UI 主题适配 */
+:deep(.el-button--default) {
+  background-color: var(--card-bg, #f5f5f5);
+  border-color: var(--border-color, #d0d0d0);
+  color: var(--text-color, #000000);
+}
+
+:deep(.el-button--default:hover) {
+  background-color: var(--hover-color, #e9e9e9);
+  border-color: var(--border-color, #d0d0d0);
+  color: var(--text-color, #000000);
+}
+
+:deep(.el-switch) {
+  --el-switch-on-color: var(--primary-color, #4a82f0);
+  --el-switch-off-color: var(--border-color, #d0d0d0);
+}
+
+:deep(.el-switch__core) {
+  background-color: var(--border-color, #d0d0d0);
+  border-color: var(--border-color, #d0d0d0);
+}
+
+:deep(.el-switch.is-checked .el-switch__core) {
+  background-color: var(--primary-color, #4a82f0);
+  border-color: var(--primary-color, #4a82f0);
+}
+
+/* Dark theme overrides */
+.dark-theme :deep(.el-button--default) {
+  background-color: var(--card-bg, #3a3a3a);
+  border-color: var(--border-color, #666666);
+  color: var(--text-color, #d0d0d0);
+}
+
+.dark-theme :deep(.el-button--default:hover) {
+  background-color: var(--hover-color, #444444);
+  border-color: var(--border-color, #666666);
+  color: var(--text-color, #d0d0d0);
+}
+
+.dark-theme :deep(.el-switch__core) {
+  background-color: var(--border-color, #666666);
+  border-color: var(--border-color, #666666);
+}
+
+.dark-theme :deep(.el-switch.is-checked .el-switch__core) {
+  background-color: var(--primary-color, #4a82f0);
+  border-color: var(--primary-color, #4a82f0);
 }
 </style> 

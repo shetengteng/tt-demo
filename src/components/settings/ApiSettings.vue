@@ -162,24 +162,88 @@ const saveSettings = async () => {
   margin-bottom: 0;
 }
 
-/* 深色模式表单样式优化 */
-:deep(.dark-theme .el-input__inner) {
-  background-color: var(--card-bg);
-  border-color: var(--border-color);
-  color: var(--text-color);
+/* Element UI 主题适配 */
+:deep(.el-input__wrapper) {
+  background-color: var(--card-bg, #f5f5f5);
+  border-color: var(--border-color, #d0d0d0);
+  color: var(--text-color, #000000);
 }
 
-:deep(.dark-theme .el-select__wrapper) {
-  background-color: var(--card-bg);
+:deep(.el-input__inner) {
+  color: var(--text-color, #000000);
+  background-color: transparent;
 }
 
-:deep(.dark-theme .el-form-item__label) {
-  color: var(--text-color);
+:deep(.el-input__inner::placeholder) {
+  color: var(--secondary-text-color, #999);
 }
 
-:deep(.dark-theme .el-button--default) {
-  background-color: var(--card-bg);
-  border-color: var(--border-color);
-  color: var(--text-color);
+:deep(.el-select__wrapper) {
+  background-color: var(--card-bg, #f5f5f5);
+  border-color: var(--border-color, #d0d0d0);
+  color: var(--text-color, #000000);
+}
+
+:deep(.el-select__inner) {
+  color: var(--text-color, #000000);
+  background-color: transparent;
+}
+
+:deep(.el-form-item__label) {
+  color: var(--text-color, #000000);
+}
+
+:deep(.el-button--primary) {
+  background-color: var(--primary-color, #4a82f0);
+  border-color: var(--primary-color, #4a82f0);
+  color: white;
+}
+
+:deep(.el-button--primary:hover) {
+  background-color: var(--new-chat-hover-bg, #0056cc);
+  border-color: var(--new-chat-hover-bg, #0056cc);
+}
+
+/* Dark theme overrides */
+.dark-theme :deep(.el-input__wrapper) {
+  background-color: var(--card-bg, #3a3a3a);
+  border-color: var(--border-color, #666666);
+  color: var(--text-color, #d0d0d0);
+}
+
+.dark-theme :deep(.el-input__inner) {
+  color: var(--text-color, #d0d0d0);
+}
+
+.dark-theme :deep(.el-select__wrapper) {
+  background-color: var(--card-bg, #3a3a3a);
+  border-color: var(--border-color, #666666);
+  color: var(--text-color, #d0d0d0);
+}
+
+.dark-theme :deep(.el-select__inner) {
+  color: var(--text-color, #d0d0d0);
+}
+
+.dark-theme :deep(.el-form-item__label) {
+  color: var(--text-color, #d0d0d0);
+}
+
+.dark-theme :deep(.el-select-dropdown) {
+  background-color: var(--card-bg, #3a3a3a);
+  border-color: var(--border-color, #666666);
+}
+
+.dark-theme :deep(.el-select-dropdown__item) {
+  color: var(--text-color, #d0d0d0);
+}
+
+.dark-theme :deep(.el-select-dropdown__item:hover) {
+  background-color: var(--hover-color, #444444);
+}
+
+.dark-theme :deep(.el-select-dropdown__item.selected) {
+  background-color: var(--primary-color, #4a82f0);
+  color: white;
 }
 </style> 

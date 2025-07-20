@@ -427,4 +427,76 @@ const groupedChats = computed(() => {
   color: var(--secondary-text-color, #999);
   font-size: 14px;
 }
+
+/* Element UI 主题适配 */
+:deep(.el-button--primary) {
+  background-color: var(--new-chat-bg, #0078ff);
+  border-color: var(--new-chat-bg, #0078ff);
+  color: var(--new-chat-text, white);
+}
+
+:deep(.el-button--primary:hover) {
+  background-color: var(--new-chat-hover-bg, #0056cc);
+  border-color: var(--new-chat-hover-bg, #0056cc);
+}
+
+:deep(.el-dropdown-menu) {
+  background-color: var(--card-bg, #f5f5f5);
+  border-color: var(--border-color, #d0d0d0);
+}
+
+:deep(.el-dropdown-menu__item) {
+  color: var(--text-color, #000000);
+}
+
+:deep(.el-dropdown-menu__item:hover) {
+  background-color: var(--hover-color, #e9e9e9);
+  color: var(--text-color, #000000);
+}
+
+:deep(.el-dropdown-menu__item.is-disabled) {
+  color: var(--secondary-text-color, #999);
+}
+
+/* Dark theme overrides */
+.dark-theme :deep(.el-dropdown-menu) {
+  background-color: var(--card-bg, #2d2d2d);
+  border-color: var(--border-color, #555555);
+}
+
+.dark-theme :deep(.el-dropdown-menu__item) {
+  color: var(--text-color, #ffffff);
+}
+
+.dark-theme :deep(.el-dropdown-menu__item:hover) {
+  background-color: var(--hover-color, #333333);
+  color: var(--text-color, #ffffff);
+}
+
+/* 自定义滚动条样式 */
+.chat-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.chat-list::-webkit-scrollbar-track {
+  background-color: transparent;
+}
+
+.chat-list::-webkit-scrollbar-thumb {
+  background-color: var(--border-color, #d0d0d0);
+  border-radius: 3px;
+}
+
+.chat-list::-webkit-scrollbar-thumb:hover {
+  background-color: var(--secondary-text-color, #999);
+}
+
+/* Dark theme scrollbar overrides */
+.dark-theme .chat-list::-webkit-scrollbar-thumb {
+  background-color: var(--border-color, #666666);
+}
+
+.dark-theme .chat-list::-webkit-scrollbar-thumb:hover {
+  background-color: var(--secondary-text-color, #a0a0a0);
+}
 </style> 
