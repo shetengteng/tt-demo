@@ -37,9 +37,7 @@
 import MessageList from '../components/MessageList.vue';
 import MessageInput from '../components/MessageInput.vue';
 import ChatRecordList from '../components/ChatRecordList.vue';
-import {useMessageHandler} from '../composables/useMessageHandler';
-
-const {
+import { 
   handleSendMessage, 
   handleModelChange, 
   messages, 
@@ -50,7 +48,7 @@ const {
   selectChat,
   deleteChat,
   renameChat
-} = useMessageHandler();
+} from '../composables/useGlobalMessageHandler';
 </script>
 
 <style>
