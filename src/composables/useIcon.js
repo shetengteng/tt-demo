@@ -40,7 +40,8 @@ const iconMap = {
     theme: 'ri-palette-line',
     info: 'ri-information-line',
     user_plus: 'ri-user-add-line',
-    keyboard: 'ri-keyboard-line'
+    keyboard: 'ri-keyboard-line',
+    github: 'ri-github-fill'
 };
 
 export function useIcon() {
