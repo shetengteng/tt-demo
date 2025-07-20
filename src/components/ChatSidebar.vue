@@ -94,6 +94,7 @@ const handleThemeToggle = (event) => {
 
 <style scoped>
 .chat-sidebar {
+  flex-shrink: 0;
   width: 60px;
   height: 100%;
   background-color: var(--sidebar-bg-color, #ffffff);

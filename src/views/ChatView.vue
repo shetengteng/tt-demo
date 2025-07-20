@@ -3,7 +3,7 @@
     <!-- 使用Splitter实现可拖拽分隔面板 -->
     <el-splitter style="height: 100%">
       <!-- 聊天记录列表面板 -->
-      <el-splitter-panel :min="200" :max="350" size="250px">
+      <el-splitter-panel :min="180" :max="300" size="220px">
         <ChatRecordList 
           :chat-sessions="chatSessions"
           :current-chat-id="currentChatId"
@@ -94,26 +94,18 @@ html, body {
   flex: 1;
   overflow: hidden;
   position: relative;
-  padding-bottom: 120px;
+  min-height: 0; /* 确保flex子元素可以正确收缩 */
 }
 
 .input-wrapper {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  z-index: 10;
+  flex-shrink: 0; /* 防止输入框被压缩 */
   background-color: transparent;
   padding: 0 40px 20px 40px;
 }
 
 /* 移除被深度组件继承的样式 */
 :deep(.message-list) {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
+  height: 100%;
   overflow-y: auto;
   overflow-x: hidden;
 }
