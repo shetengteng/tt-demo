@@ -7,7 +7,7 @@
     </div>
     <div class="ai-message-wrapper" v-else>
         <!-- 将图标移至消息外部 -->
-        <FontAwesomeIcon :icon="faRobot" class="ai-icon" />
+        <i :class="getIconClass('robot')" class="ai-icon"></i>
         <div class="ai-message-content">
             <!-- 添加模型信息显示 -->
             <div class="ai-model-info">
@@ -20,7 +20,7 @@
                 <!-- 思考过程 -->
                 <div v-if="msg.reasoningContent" class="reasoning-content">
                     <div class="reasoning-header">
-                        <FontAwesomeIcon :icon="faLightbulb" class="thinking-icon" />
+                        <i :class="getIconClass('lightbulb')" class="thinking-icon"></i>
                         <h4>思考过程</h4>
                     </div>
                     <div class="reasoning-body">
@@ -43,7 +43,7 @@
                 <!-- 显示回答内容 (无论思考过程是否完成，只要有内容就显示) -->
                 <div v-if="hasAnswer || msg.contentStarted" class="ai-message final-answer">
                     <div class="answer-header">
-                        <FontAwesomeIcon :icon="faCheck" class="answer-icon" />
+                        <i :class="getIconClass('check')" class="answer-icon"></i>
                         <h4>回答</h4>
                         <div v-if="!msg.reasoningComplete" class="typing-indicator">
                             <span class="typing-dot"></span>
@@ -73,9 +73,10 @@
 
 <script setup>
 import MarkdownRenderer from './MarkdownRenderer.vue';
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
-import { faRobot, faLightbulb, faCheck } from '@fortawesome/free-solid-svg-icons';
+import { useIcon } from '../composables/useIcon';
 import { computed } from 'vue';
+
+const { getIconClass } = useIcon();
 
 const props = defineProps({
     msg: {
@@ -140,6 +141,7 @@ const notifyContentRendered = () => {
     color: var(--ai-icon-color);
     margin-top: 4px;
     flex-shrink: 0;
+    font-size: 20px;
 }
 
 .ai-message-content {
@@ -212,10 +214,12 @@ const notifyContentRendered = () => {
 
 .thinking-icon {
     color: #0078d4;
+    font-size: 16px;
 }
 
 .answer-icon {
     color: #28a745;
+    font-size: 16px;
 }
 
 .final-answer {

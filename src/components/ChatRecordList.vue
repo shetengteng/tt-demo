@@ -1,39 +1,40 @@
 <template>
   <div class="chat-records">
-    <div class="records-header">
-      <h3>聊天记录</h3>
-      <el-button 
-        type="primary" 
-        size="small" 
-        circle 
-        @click="createNewChat"
-        class="new-chat-btn"
-      >
-        <FontAwesomeIcon icon="plus" />
-      </el-button>
+    <!-- 新建聊天按钮 -->
+    <div class="new-chat-button" @click="createNewChat">
+      <i :class="getIconClass('plus')"></i>
+      <span>New Chat</span>
+      <i :class="getIconClass('magic')" class="magic-icon"></i>
     </div>
     
     <div class="chat-list">
+      <!-- 保存的聊天 -->
+      <div class="chat-category">
+        <i :class="getIconClass('star')" class="category-icon"></i>
+        <span>Saved</span>
+      </div>
+      
+      <!-- 聊天列表 -->
       <div 
         v-for="chat in chatSessions" 
         :key="chat.id"
         class="chat-item"
         :class="{ active: currentChatId === chat.id }"
+        @click="selectChat(chat.id)"
       >
-        <div class="chat-content" @click="selectChat(chat.id)">
-          <div class="chat-title">{{ chat.title || '新的聊天' }}</div>
-          <div class="chat-time">{{ formatTime(chat.lastUpdated) }}</div>
+        <!-- 左侧图标，使用首字母或图标 -->
+        <div class="chat-icon" :style="getIconStyle(chat)">
+          <span>{{ getInitial(chat.title) }}</span>
         </div>
+        
+        <!-- 中间内容 -->
+        <div class="chat-content">
+          <div class="chat-title">{{ chat.title || '新的聊天' }}</div>
+        </div>
+        
+        <!-- 右侧菜单 -->
         <div class="chat-actions">
-          <el-button
-            class="delete-btn"
-            type="danger"
-            size="small"
-            circle
-            @click.stop="confirmDelete(chat.id)"
-          >
-            <FontAwesomeIcon icon="times" />
-          </el-button>
+          <i :class="getIconClass('dots')" class="menu-dots" @click.stop="showMenu(chat.id)"></i>
         </div>
       </div>
       
@@ -47,6 +48,9 @@
 <script setup>
 import { computed, ref } from 'vue';
 import { ElMessageBox } from 'element-plus';
+import { useIcon } from '../composables/useIcon';
+
+const { getIconClass } = useIcon();
 
 const props = defineProps({
   chatSessions: {
@@ -67,6 +71,56 @@ const createNewChat = () => {
 
 const selectChat = (chatId) => {
   emit('select-chat', chatId);
+};
+
+// 获取聊天标题的首字母
+const getInitial = (title) => {
+  if (!title) return 'N';
+  return title.charAt(0).toUpperCase();
+};
+
+// 根据聊天标题生成图标样式
+const getIconStyle = (chat) => {
+  // 预定义的颜色列表
+  const colors = [
+    { bg: '#e8f0fe', text: '#1a73e8' }, // 蓝色
+    { bg: '#fce8e6', text: '#d93025' }, // 红色
+    { bg: '#e6f4ea', text: '#1e8e3e' }, // 绿色
+    { bg: '#fef7e0', text: '#f9ab00' }, // 黄色
+    { bg: '#f3e8fd', text: '#9334e6' }, // 紫色
+  ];
+  
+  // 根据聊天ID选择一个颜色
+  const colorIndex = chat.id.charCodeAt(0) % colors.length;
+  const color = colors[colorIndex];
+  
+  return {
+    backgroundColor: color.bg,
+    color: color.text
+  };
+};
+
+// 显示菜单
+const showMenu = (chatId) => {
+  ElMessageBox.confirm(
+    '选择操作',
+    '聊天菜单',
+    {
+      confirmButtonText: '重命名',
+      cancelButtonText: '删除',
+      distinguishCancelAndClose: true,
+      type: 'info'
+    }
+  )
+    .then(() => {
+      // 重命名逻辑（此处仅示例）
+      console.log('重命名', chatId);
+    })
+    .catch((action) => {
+      if (action === 'cancel') {
+        confirmDelete(chatId);
+      }
+    });
 };
 
 // 确认删除对话框
@@ -113,38 +167,60 @@ const formatTime = (timestamp) => {
   display: flex;
   flex-direction: column;
   flex-shrink: 0;
+  padding: 10px;
 }
 
-.records-header {
-  padding: 16px;
+.new-chat-button {
+  margin: 8px;
+  padding: 10px 15px;
+  background-color: #05101f;
+  color: white;
+  border-radius: 20px;
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  border-bottom: 1px solid var(--border-color, #e0e0e0);
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-weight: 500;
 }
 
-.records-header h3 {
-  margin: 0;
-  font-size: 16px;
+.new-chat-button:hover {
+  background-color: #122142;
+}
+
+.magic-icon {
+  transform: rotate(45deg);
+}
+
+.chat-category {
+  margin: 16px 8px 8px 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--secondary-text-color, #999);
   font-weight: 500;
+}
+
+.category-icon {
+  font-size: 14px;
 }
 
 .chat-list {
   flex: 1;
   overflow-y: auto;
-  padding: 8px;
+  padding: 0 4px;
 }
 
 .chat-item {
   padding: 8px;
   border-radius: 8px;
-  margin-bottom: 8px;
+  margin-bottom: 4px;
   cursor: pointer;
   transition: background-color 0.2s;
-  position: relative;
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  gap: 10px;
 }
 
 .chat-item:hover {
@@ -155,23 +231,28 @@ const formatTime = (timestamp) => {
   background-color: var(--active-color, #e6f7ff);
 }
 
+.chat-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-weight: 500;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
 .chat-content {
   flex: 1;
   min-width: 0;
-  padding: 4px 8px;
 }
 
 .chat-title {
   font-size: 14px;
-  margin-bottom: 4px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-}
-
-.chat-time {
-  font-size: 12px;
-  color: var(--secondary-text-color, #999);
 }
 
 .chat-actions {
@@ -183,11 +264,10 @@ const formatTime = (timestamp) => {
   opacity: 1;
 }
 
-.delete-btn {
-  min-height: 24px;
-  min-width: 24px;
-  font-size: 12px;
-  padding: 0;
+.menu-dots {
+  color: var(--secondary-text-color, #999);
+  font-size: 16px;
+  padding: 4px;
 }
 
 .empty-state {
@@ -195,11 +275,5 @@ const formatTime = (timestamp) => {
   padding: 24px 0;
   color: var(--secondary-text-color, #999);
   font-size: 14px;
-}
-
-.new-chat-btn {
-  min-height: 32px;
-  min-width: 32px;
-  font-size: 16px;
 }
 </style> 

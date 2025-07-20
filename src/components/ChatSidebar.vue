@@ -12,33 +12,33 @@
         <!-- 聊天图标 - 确保这个是active的状态 -->
         <div class="sidebar-icon" :class="{ active: currentRoute === '/' || currentRoute === '/chat' }" @click="navigateTo('/chat')">
           <div class="icon-bg">
-            <FontAwesomeIcon icon="message" />
+            <i :class="getIconClass('message')"></i>
           </div>
         </div>
         
         <!-- 耳机图标 -->
         <div class="sidebar-icon" :class="{ active: currentRoute === '/support' }" @click="navigateTo('/support')">
-          <FontAwesomeIcon icon="headset" />
+          <i :class="getIconClass('headset')"></i>
         </div>
         
         <!-- 闪电图标 -->
         <div class="sidebar-icon" :class="{ active: currentRoute === '/actions' }" @click="navigateTo('/actions')">
-          <FontAwesomeIcon icon="bolt" />
+          <i :class="getIconClass('bolt')"></i>
         </div>
         
         <!-- 加号图标 -->
         <div class="sidebar-icon" @click="createNewChat">
-          <FontAwesomeIcon icon="plus" />
+          <i :class="getIconClass('plus')"></i>
         </div>
         
         <!-- 日历图标 -->
         <div class="sidebar-icon" :class="{ active: currentRoute === '/calendar' }" @click="navigateTo('/calendar')">
-          <FontAwesomeIcon icon="calendar" />
+          <i :class="getIconClass('calendar')"></i>
         </div>
         
         <!-- 设置图标 -->
         <div class="sidebar-icon" :class="{ active: currentRoute === '/settings' }" @click="navigateTo('/settings')">
-          <FontAwesomeIcon icon="cog" />
+          <i :class="getIconClass('cog')"></i>
         </div>
       </div>
       
@@ -46,13 +46,13 @@
       <div class="icon-group bottom">
         <!-- 用户图标带New标记 -->
         <div class="sidebar-icon" :class="{ active: currentRoute === '/profile' }" @click="navigateTo('/profile')">
-          <FontAwesomeIcon icon="user" />
+          <i :class="getIconClass('user')"></i>
           <span class="new-badge">New</span>
         </div>
         
         <!-- 主题切换图标 -->
         <div class="sidebar-icon theme-toggle" @click="toggleTheme">
-          <FontAwesomeIcon :icon="darkMode ? 'moon' : 'sun'" />
+          <i :class="themeIcon"></i>
         </div>
       </div>
     </div>
@@ -63,9 +63,11 @@
 import { computed, ref } from 'vue';
 import { useGlobalTheme } from '../composables/useGlobalTheme';
 import { useRouter } from 'vue-router';
+import { useIcon } from '../composables/useIcon';
 
 const router = useRouter();
-const { toggleTheme, currentTheme, darkMode } = useGlobalTheme();
+const { toggleTheme, currentTheme } = useGlobalTheme();
+const { getIconClass, themeIcon } = useIcon();
 
 // 获取当前路由
 const currentRoute = computed(() => router.currentRoute.value.path);
@@ -129,7 +131,7 @@ const createNewChat = () => {
   cursor: pointer;
   position: relative;
   color: var(--icon-color, #666);
-  font-size: 16px;
+  font-size: 18px;
   transition: all 0.2s ease;
 }
 
@@ -170,5 +172,11 @@ const createNewChat = () => {
 
 .theme-toggle {
   margin-top: 20px;
+}
+
+.remix-icon {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
 }
 </style> 
