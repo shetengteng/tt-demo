@@ -6,7 +6,10 @@
   "type": "module",
   "scripts": {
     "start": "concurrently \"vite\" \"wait-on http://localhost:5173 && NODE_ENV=development electron .\"",
-    "postinstall": "electron-builder install-app-deps"
+    "postinstall": "electron-builder install-app-deps",
+    "lint": "eslint src/ --ext .vue,.js,.jsx,.cjs,.mjs --fix",
+    "format": "prettier --write src/",
+    "format:check": "prettier --check src/"
   },
   "keywords": [
     "ai",
@@ -40,6 +43,12 @@
   "devDependencies": {
     "concurrently": "^9.2.0",
     "electron-builder": "^24.13.3",
-    "wait-on": "^8.0.3"
+    "wait-on": "^8.0.3",
+    "@eslint/js": "^9.0.0",
+    "eslint": "^9.0.0",
+    "eslint-plugin-vue": "^9.0.0",
+    "eslint-config-prettier": "^9.0.0",
+    "eslint-plugin-prettier": "^5.0.0",
+    "prettier": "^3.0.0"
   }
 }

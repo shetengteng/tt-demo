@@ -32,8 +32,10 @@ const SQL = {
       updated_at INTEGER NOT NULL
     )
   `,
-  SELECT_MESSAGES_BY_CHAT_ID: 'SELECT * FROM messages WHERE chat_id = ? ORDER BY timestamp ASC',
-  SELECT_ALL_CHAT_SESSIONS: 'SELECT * FROM chat_sessions ORDER BY last_updated DESC',
+  SELECT_MESSAGES_BY_CHAT_ID:
+    'SELECT * FROM messages WHERE chat_id = ? ORDER BY timestamp ASC',
+  SELECT_ALL_CHAT_SESSIONS:
+    'SELECT * FROM chat_sessions ORDER BY last_updated DESC',
   SELECT_CONFIG: 'SELECT value FROM app_configs WHERE key = ?',
   SELECT_ALL_CONFIGS: 'SELECT * FROM app_configs',
   INSERT_MESSAGE: `
@@ -48,15 +50,15 @@ const SQL = {
   `,
   DELETE_MESSAGES_BY_CHAT_ID: 'DELETE FROM messages WHERE chat_id = ?',
   DELETE_CHAT_SESSION: 'DELETE FROM chat_sessions WHERE id = ?',
-  DELETE_CONFIG: 'DELETE FROM app_configs WHERE key = ?'
-};
+  DELETE_CONFIG: 'DELETE FROM app_configs WHERE key = ?',
+}
 
 // 检查是否在Node.js环境中运行
 if (typeof module !== 'undefined' && module.exports) {
   // Node.js/CommonJS环境
-  module.exports = { SQL };
+  module.exports = { SQL }
 }
 
 // 默认导出，支持ESM
-export { SQL };
-export default { SQL }; 
+export { SQL }
+export default { SQL }
