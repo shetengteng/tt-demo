@@ -72,13 +72,4 @@ const saveSettings = () => {
 .settings-container {
   padding: 20px;
 }
-
-.el-card {
-  max-width: 600px;
-  margin: 0 auto;
-}
-
-.el-select {
-  width: 100%;
-}
 </style>

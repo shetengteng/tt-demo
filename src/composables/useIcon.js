@@ -14,6 +14,7 @@ const iconMap = {
     user: 'ri-user-line',
     sun: 'ri-sun-line',
     moon: 'ri-moon-line',
+    bard: 'ri-bard-line',
 
     // 聊天记录列表图标
     magic: 'ri-magic-line',

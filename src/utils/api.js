@@ -143,6 +143,5 @@ export const sendMessageToAI = async (message, onChunk, signal) => {
 export const availableModels = [
   { value: 'deepseek-chat', label: 'DeepSeek Chat' },
   { value: 'deepseek-coder', label: 'DeepSeek Coder' },
-  { value: 'deepseek-lite', label: 'DeepSeek Lite' },
-  { value: 'deepseek-reasoner', label: 'DeepSeek Reasoner (带思考链)' }
+  { value: 'deepseek-reasoner', label: 'DeepSeek Reasoner' }
 ];

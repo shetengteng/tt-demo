@@ -3,16 +3,11 @@
     <!-- 新建聊天按钮 -->
     <el-button class="new-chat-button" @click="createNewChat" type="primary">
       <i :class="getIconClass('plus')" class="icon-margin-right"></i>
-      <span>New Chat</span>
-      <i :class="getIconClass('magic')" class="magic-icon"></i>
+      <span style="margin-left: 10px;">New Chat</span>
+      <i :class="getIconClass('bard')" style="margin-left: 10px;"></i>
     </el-button>
     
     <div class="chat-list">
-      <!-- 保存的聊天 -->
-      <div class="chat-category">
-        <i :class="getIconClass('star')" class="category-icon"></i>
-        <span>Saved</span>
-      </div>
       
       <!-- 按日期分组聊天列表 -->
       <el-collapse v-model="activeGroups" class="custom-collapse">
@@ -231,15 +226,16 @@ const groupedChats = computed(() => {
 
 <style scoped>
 .chat-records {
-  width: 250px;
+  width: 100%; /* 修改为100%宽度 */
   height: 100%;
   background-color: var(--sidebar-bg-color, #f5f5f5);
   border-right: 1px solid var(--border-color, #e0e0e0);
   display: flex;
   flex-direction: column;
-  flex-shrink: 0;
   padding: 10px;
   position: relative;
+  box-sizing: border-box; /* 确保padding不增加总宽度 */
+  overflow: hidden; /* 防止滚动条出现在容器本身 */
 }
 
 .new-chat-button {
@@ -266,9 +262,6 @@ const groupedChats = computed(() => {
   margin-right: 0;
 }
 
-.magic-icon {
-  transform: rotate(45deg);
-}
 
 .chat-category {
   margin: 16px 8px 8px 8px;
@@ -286,7 +279,9 @@ const groupedChats = computed(() => {
 .chat-list {
   flex: 1;
   overflow-y: auto;
+  overflow-x: hidden; /* 隐藏横向滚动条 */
   padding: 0 4px;
+  width: 100%; /* 确保列表占满容器宽度 */
 }
 
 /* 自定义Element UI折叠面板样式 */
@@ -296,6 +291,13 @@ const groupedChats = computed(() => {
   --el-collapse-header-text-color: var(--secondary-text-color, #999);
   --el-collapse-content-bg-color: transparent;
   --el-collapse-border-color: transparent;
+  width: 100%; /* 确保折叠面板占满宽度 */
+}
+
+/* 修复折叠面板可能导致的滚动问题 */
+.date-group-item {
+  overflow-x: hidden;
+  width: 100%;
 }
 
 .date-group-item :deep(.el-collapse-item__header) {
@@ -305,12 +307,30 @@ const groupedChats = computed(() => {
   color: var(--secondary-text-color, #999);
 }
 
+/* 修复箭头不可见的问题 */
+.date-group-item :deep(.el-collapse-item__arrow) {
+  color: var(--secondary-text-color, #999);
+  font-size: 12px;
+  margin: 0 8px;
+  transition: transform 0.3s;
+}
+
+.date-group-item :deep(.is-active .el-collapse-item__arrow) {
+  transform: rotate(90deg);
+}
+
 .date-group-item :deep(.el-collapse-item__content) {
   padding: 0;
 }
 
+.date-group-item :deep(.el-collapse-item__wrap) {
+  overflow: hidden; /* 防止内容区出现滚动条 */
+}
+
 .chat-group-list {
   padding: 0;
+  width: 100%; /* 确保组列表占满宽度 */
+  overflow: hidden; /* 隐藏可能的滚动条 */
 }
 
 .chat-item {
@@ -323,6 +343,9 @@ const groupedChats = computed(() => {
   align-items: center;
   gap: 10px;
   position: relative;
+  width: auto; /* 改为auto以防止宽度溢出 */
+  box-sizing: border-box; /* 确保padding不增加总宽度 */
+  max-width: 100%; /* 确保不超出容器 */
 }
 
 .chat-item:hover {
@@ -348,6 +371,9 @@ const groupedChats = computed(() => {
 .chat-content {
   flex: 1;
   min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .chat-title {

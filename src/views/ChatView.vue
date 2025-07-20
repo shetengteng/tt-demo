@@ -1,27 +1,35 @@
 <template>
   <div class="chat-container" v-if="isMounted">
-    <!-- 聊天记录列表 -->
-    <ChatRecordList 
-      :chat-sessions="chatSessions"
-      :current-chat-id="currentChatId"
-      @new-chat="createNewChat"
-      @select-chat="selectChat"
-      @delete-chat="deleteChat"
-      @rename-chat="renameChat"
-      class="chat-records-list"
-    />
-    
-    <div class="chat-main">
-      <div class="messages-wrapper">
-        <MessageList :messages="messages"/>
-      </div>
-      <div class="input-wrapper">
-        <MessageInput 
-          @send-message="handleSendMessage"
-          @change-model="handleModelChange"
+    <!-- 使用Splitter实现可拖拽分隔面板 -->
+    <el-splitter style="height: 100%">
+      <!-- 聊天记录列表面板 -->
+      <el-splitter-panel :min="200" :max="350" size="250px">
+        <ChatRecordList 
+          :chat-sessions="chatSessions"
+          :current-chat-id="currentChatId"
+          @new-chat="createNewChat"
+          @select-chat="selectChat"
+          @delete-chat="deleteChat"
+          @rename-chat="renameChat"
+          class="chat-records-list"
         />
-      </div>
-    </div>
+      </el-splitter-panel>
+      
+      <!-- 聊天内容主区域面板 -->
+      <el-splitter-panel>
+        <div class="chat-main">
+          <div class="messages-wrapper">
+            <MessageList :messages="messages"/>
+          </div>
+          <div class="input-wrapper">
+            <MessageInput 
+              @send-message="handleSendMessage"
+              @change-model="handleModelChange"
+            />
+          </div>
+        </div>
+      </el-splitter-panel>
+    </el-splitter>
   </div>
 </template>
 
@@ -70,11 +78,12 @@ html, body {
 }
 
 .chat-records-list {
-  flex-shrink: 0;
+  height: 100%;
+  overflow-y: auto;
 }
 
 .chat-main {
-  flex: 1;
+  height: 100%;
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -104,5 +113,14 @@ html, body {
   bottom: 0;
   overflow-y: auto;
   overflow-x: hidden;
+}
+
+/* 自定义分隔条样式 */
+:deep(.el-splitter__bar) {
+  background-color: var(--border-color, #e0e0e0);
+}
+
+:deep(.el-splitter__bar:hover) {
+  background-color: var(--primary-color, #4a82f0);
 }
 </style>

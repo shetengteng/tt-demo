@@ -1,5 +1,5 @@
 import { ref, reactive, onMounted, onUnmounted, computed } from 'vue';
-import { sendMessageToAI, availableModels } from '../utils/api';
+import { sendMessageToAI, availableModels } from '@/utils/api';
 import { ElMessage } from 'element-plus';
 import { v4 as uuidv4 } from 'uuid';
 
