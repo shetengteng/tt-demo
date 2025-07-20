@@ -152,13 +152,13 @@ const notifyContentRendered = () => {
 }
 
 .ai-model-info {
-    font-size: 12px;
-    margin-bottom: 2px;
-    color: var(--text-secondary-color, #666);
-    font-weight: 500;
-    display: flex;
-    align-items: center;
-    gap: 8px;
+  font-size: 12px;
+  margin-bottom: 2px;
+  color: var(--secondary-text-color, #666);
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .reasoning-badge {
@@ -188,9 +188,9 @@ const notifyContentRendered = () => {
 }
 
 .reasoning-text :deep(.markdown-body) {
-    font-size: 12px !important;
-    color: var(--text-secondary-color, #666) !important;
-    line-height: 1.5;
+  font-size: 12px !important;
+  color: var(--secondary-text-color, #666) !important;
+  line-height: 1.5;
 }
 
 .reasoning-text :deep(pre),

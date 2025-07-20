@@ -97,7 +97,7 @@ const handleThemeToggle = (event) => {
   width: 60px;
   height: 100%;
   background-color: var(--sidebar-bg-color, #ffffff);
-  border-right: 1px solid var(--border-color, #f0f0f0);
+  border-right: 1px solid var(--border-color, #d0d0d0);
   display: flex;
   flex-direction: column;
   align-items: center;

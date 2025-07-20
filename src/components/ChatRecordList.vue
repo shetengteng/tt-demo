@@ -237,7 +237,7 @@ const groupedChats = computed(() => {
   width: 100%; /* 修改为100%宽度 */
   height: 100%;
   background-color: var(--sidebar-bg-color, #f5f5f5);
-  border-right: 1px solid var(--border-color, #e0e0e0);
+  border-right: 1px solid var(--border-color, #d0d0d0);
   display: flex;
   flex-direction: column;
   padding: 10px;
@@ -248,8 +248,8 @@ const groupedChats = computed(() => {
 
 .new-chat-button {
   margin: 8px;
-  background-color: #05101f;
-  color: white;
+  background-color: var(--new-chat-bg, #0078ff);
+  color: var(--new-chat-text, white);
   border: none;
   border-radius: 20px;
   display: flex;
@@ -263,7 +263,7 @@ const groupedChats = computed(() => {
 }
 
 .new-chat-button:hover {
-  background-color: #122142;
+  background-color: var(--new-chat-hover-bg, #0056cc);
 }
 
 .icon-margin-right {
@@ -389,6 +389,7 @@ const groupedChats = computed(() => {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  color: var(--primary-text-color, #333);
 }
 
 .chat-actions {

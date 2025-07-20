@@ -103,8 +103,8 @@ const sectionTitles = {
   height: 100%;
   width: 100%;
   background-color: var(--sidebar-bg-color, #f5f5f5);
-  border-right: 1px solid var(--border-color, #e0e0e0);
-  padding: 20px 0;
+  border-right: 1px solid var(--border-color, #d0d0d0);
+  padding: 10px 0;
   overflow-y: auto;
   -ms-overflow-style: none;  /* IE and Edge */
   scrollbar-width: none;  /* Firefox */
@@ -119,11 +119,12 @@ const sectionTitles = {
 
 .sidebar-title {
   padding: 0 20px;
-  margin-bottom: 20px;
+  margin-bottom: 16px;
   display: flex;
   align-items: center;
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 600;
+  color: var(--secondary-text-color, #999);
 }
 
 .sidebar-icon {
@@ -133,9 +134,11 @@ const sectionTitles = {
 .sidebar-item {
   display: flex;
   align-items: center;
-  padding: 12px 20px;
+  padding: 8px 12px;
+  margin: 0 8px 4px 8px;
   cursor: pointer;
   transition: background-color 0.2s ease;
+  border-radius: 8px;
 }
 
 .sidebar-item:hover {
