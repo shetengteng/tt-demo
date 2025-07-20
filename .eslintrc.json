@@ -21,6 +21,16 @@
     "no-debugger": "warn"
   },
   "globals": {
-    "process": "readonly"
+    "process": "readonly",
+    "console": "readonly",
+    "window": "readonly",
+    "document": "readonly",
+    "localStorage": "readonly",
+    "fetch": "readonly",
+    "AbortController": "readonly",
+    "TextDecoder": "readonly",
+    "__dirname": "readonly",
+    "require": "readonly",
+    "module": "readonly"
   }
 } 

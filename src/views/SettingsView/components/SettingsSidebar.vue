@@ -30,7 +30,7 @@
 </template>
 
 <script setup>
-  import { useIcon } from '../../../composables/useIcon'
+  import { useIcon } from '@/composables/useIcon.js'
 
   const { getIconClass } = useIcon()
 

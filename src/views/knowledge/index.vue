@@ -36,7 +36,7 @@
 
 <script setup>
   import { ref, computed, onMounted } from 'vue'
-  import { useIcon } from '../../composables/useIcon'
+  import { useIcon } from '@/composables/useIcon'
   import KnowledgeList from './KnowledgeList.vue'
   import KnowledgeContent from './KnowledgeContent.vue'
 

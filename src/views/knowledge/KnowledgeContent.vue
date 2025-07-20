@@ -140,7 +140,7 @@
 
 <script setup>
   import { ref, computed } from 'vue'
-  import { useIcon } from '../../composables/useIcon'
+  import { useIcon } from '@/composables/useIcon'
 
   const { getIconClass } = useIcon()
 

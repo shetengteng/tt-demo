@@ -77,8 +77,8 @@
 <script setup>
   import { computed, ref } from 'vue'
   import { ElMessageBox } from 'element-plus'
-  import { useIcon } from '../composables/useIcon'
-  import { useGlobalMessageHandler } from '../composables/useGlobalMessageHandler'
+  import { useIcon } from '@/composables/useIcon'
+  import { useGlobalMessageHandler } from '@/composables/useGlobalMessageHandler'
 
   const { getIconClass } = useIcon()
 

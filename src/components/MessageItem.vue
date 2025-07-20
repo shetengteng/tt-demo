@@ -93,7 +93,7 @@
 
 <script setup>
   import MarkdownRenderer from './MarkdownRenderer.vue'
-  import { useIcon } from '../composables/useIcon'
+  import { useIcon } from '@/composables/useIcon'
   import { computed } from 'vue'
 
   const { getIconClass } = useIcon()

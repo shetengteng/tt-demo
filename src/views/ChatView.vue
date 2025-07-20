@@ -26,16 +26,16 @@
 </template>
 
 <script setup>
-  import MessageList from '../components/MessageList.vue'
-  import MessageInput from '../components/MessageInput.vue'
-  import ChatRecordList from '../components/ChatRecordList.vue'
+  import MessageList from '@/components/MessageList.vue'
+  import MessageInput from '@/components/MessageInput.vue'
+  import ChatRecordList from '@/components/ChatRecordList.vue'
   import {
     handleSendMessage,
     handleModelChange,
     messages,
     isMounted,
     isLoading,
-  } from '../composables/useGlobalMessageHandler'
+  } from '@/composables/useGlobalMessageHandler'
 </script>
 
 <style>

@@ -27,10 +27,6 @@
   import { useIcon } from '@/composables/useIcon'
 
   // 导入设置组件
-  import GeneralSettings from '@/components/settings/GeneralSettings.vue'
-  import ApiSettings from '@/components/settings/ApiSettings.vue'
-  import AppearanceSettings from '@/components/settings/AppearanceSettings.vue'
-  import AboutSettings from '@/components/settings/AboutSettings.vue'
   import SettingsSidebar from './SettingsSidebar.vue'
   import SettingsContent from './SettingsContent.vue'
 

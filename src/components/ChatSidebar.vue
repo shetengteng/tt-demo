@@ -82,9 +82,9 @@
 
 <script setup>
   import { computed } from 'vue'
-  import { useGlobalTheme } from '../composables/useGlobalTheme'
+  import { useGlobalTheme } from '@/composables/useGlobalTheme'
   import { useRouter } from 'vue-router'
-  import { useIcon } from '../composables/useIcon'
+  import { useIcon } from '@/composables/useIcon'
 
   const router = useRouter()
   const { toggleTheme, currentTheme } = useGlobalTheme()

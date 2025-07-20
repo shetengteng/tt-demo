@@ -11,7 +11,7 @@
 
 <script setup>
   import { computed } from 'vue'
-  import { useGlobalTheme } from '../composables/useGlobalTheme'
+  import { useGlobalTheme } from '@/composables/useGlobalTheme'
 
   const { themeAnimationState, completeAnimation } = useGlobalTheme()
 

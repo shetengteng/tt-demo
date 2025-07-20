@@ -1,7 +1,7 @@
 import { createRouter, createWebHashHistory } from 'vue-router'
-import ChatView from '../views/ChatView.vue'
-import SettingsView from '../views/settings/index.vue'
-import KnowledgeView from '../views/knowledge/index.vue'
+import ChatView from '@/views/ChatView.vue'
+import SettingsView from '@/views/settings/index.vue'
+import KnowledgeView from '@/views/knowledge/index.vue'
 
 // 创建一个简单的空白组件用于暂未实现的功能
 const EmptyView = {

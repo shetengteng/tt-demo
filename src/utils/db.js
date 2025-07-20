@@ -1,5 +1,5 @@
 // src/utils/db.js - SQLite数据库操作服务
-import { SQL } from '../composables/sqlConstants.js' // 导入SQL常量
+import { SQL } from '@/composables/sqlConstants.js' // 导入SQL常量
 
 const electronAPI = window.electronAPI
 

@@ -19,10 +19,10 @@
 
 <script setup>
   // 导入设置组件
-  import GeneralSettings from '@/components/settings/GeneralSettings.vue'
-  import ApiSettings from '@/components/settings/ApiSettings.vue'
-  import AppearanceSettings from '@/components/settings/AppearanceSettings.vue'
-  import AboutSettings from '@/components/settings/AboutSettings.vue'
+  import GeneralSettings from '@/views/settings/components/GeneralSettings.vue'
+  import ApiSettings from '@/views/settings/components/ApiSettings.vue'
+  import AppearanceSettings from '@/views/settings/components/AppearanceSettings.vue'
+  import AboutSettings from '@/views/settings/components/AboutSettings.vue'
 
   // Props
   const props = defineProps({

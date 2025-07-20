@@ -34,7 +34,7 @@
 </template>
 
 <script setup>
-  import { useIcon } from '../../composables/useIcon'
+  import { useIcon } from '@/composables/useIcon'
   import KnowledgeItem from './KnowledgeItem.vue'
 
   const { getIconClass } = useIcon()
