@@ -4,15 +4,7 @@
     <el-splitter style="height: 100%">
       <!-- 聊天记录列表面板 -->
       <el-splitter-panel :min="180" :max="300" size="220px">
-        <ChatRecordList 
-          :chat-sessions="chatSessions"
-          :current-chat-id="currentChatId"
-          @new-chat="createNewChat"
-          @select-chat="selectChat"
-          @delete-chat="deleteChat"
-          @rename-chat="renameChat"
-          class="chat-records-list"
-        />
+        <ChatRecordList class="chat-records-list" />
       </el-splitter-panel>
       
       <!-- 聊天内容主区域面板 -->
@@ -41,13 +33,7 @@ import {
   handleSendMessage, 
   handleModelChange, 
   messages, 
-  isMounted, 
-  chatSessions, 
-  currentChatId, 
-  createNewChat, 
-  selectChat,
-  deleteChat,
-  renameChat
+  isMounted
 } from '../composables/useGlobalMessageHandler';
 </script>
 

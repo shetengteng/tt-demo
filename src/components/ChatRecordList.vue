@@ -74,49 +74,37 @@
 
 <script setup>
 import { computed, ref } from 'vue';
-import { ElMessageBox, ElInput } from 'element-plus';
+import { ElMessageBox } from 'element-plus';
 import { useIcon } from '../composables/useIcon';
+import { useGlobalMessageHandler } from '../composables/useGlobalMessageHandler';
 
 const { getIconClass } = useIcon();
+
+// 使用全局消息处理器
+const {
+  chatSessions,
+  currentChatId,
+  createNewChat,
+  selectChat,
+  deleteChat,
+  renameChat
+} = useGlobalMessageHandler();
 
 // 保持所有折叠面板展开
 const activeGroups = ref(['今天', '昨天', '7 天内', '更早']);
 
-const props = defineProps({
-  chatSessions: {
-    type: Array,
-    required: true
-  },
-  currentChatId: {
-    type: String,
-    required: true
-  }
-});
-
-const emit = defineEmits(['new-chat', 'select-chat', 'delete-chat', 'rename-chat']);
-
 // 处理下拉菜单命令
 const handleCommand = (command, chatId) => {
   if (command === 'rename') {
-    renameChat(chatId);
+    handleRenameChat(chatId);
   } else if (command === 'delete') {
     confirmDelete(chatId);
   }
 };
 
-// 创建新聊天
-const createNewChat = () => {
-  emit('new-chat');
-};
-
-// 选择聊天
-const selectChat = (chatId) => {
-  emit('select-chat', chatId);
-};
-
 // 重命名聊天
-const renameChat = (chatId) => {
-  const chat = props.chatSessions.find(chat => chat.id === chatId);
+const handleRenameChat = (chatId) => {
+  const chat = chatSessions.value.find(chat => chat.id === chatId);
   if (!chat) return;
   
   ElMessageBox.prompt(
@@ -132,7 +120,7 @@ const renameChat = (chatId) => {
     }
   )
     .then(({ value }) => {
-      emit('rename-chat', { id: chatId, title: value });
+      renameChat({ id: chatId, title: value });
     })
     .catch(() => {
       // 用户取消操作
@@ -151,7 +139,7 @@ const confirmDelete = (chatId) => {
     }
   )
     .then(() => {
-      emit('delete-chat', chatId);
+      deleteChat(chatId);
     })
     .catch(() => {
       // 用户取消删除操作
@@ -202,7 +190,7 @@ const groupedChats = computed(() => {
   const weekAgo = today - 7 * 24 * 60 * 60 * 1000;
   
   // 对聊天记录进行排序 (最新的在上面)
-  const sortedChats = [...props.chatSessions].sort((a, b) => {
+  const sortedChats = [...chatSessions.value].sort((a, b) => {
     return (b.lastUpdated || 0) - (a.lastUpdated || 0);
   });
   
