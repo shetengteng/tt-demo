@@ -1,4 +1,5 @@
 // src/utils/db.js - SQLite数据库操作服务
+import { SQL } from '../composables/sqlConstants'; // 导入SQL常量
 
 const electronAPI = window.electronAPI;
 
@@ -44,10 +45,7 @@ async function saveMessage(chatId, message) {
         const timestamp = Date.now();
 
         await electronAPI.db.run(
-            `INSERT INTO messages (
-                chat_id, content, reasoning_content, is_user, 
-                is_system, model, timestamp, is_reasoning_model, reasoning_complete
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            SQL.INSERT_MESSAGE,
             [
                 chatId,
                 message.content,
@@ -72,7 +70,7 @@ async function updateMessage(chatId, messageIndex, updates) {
     try {
         // 首先获取该聊天会话的指定索引消息的ID
         const messages = await electronAPI.db.query(
-            `SELECT id FROM messages WHERE chat_id = ? ORDER BY timestamp ASC`,
+            SQL.SELECT_MESSAGES_BY_CHAT_ID,
             [chatId]
         );
 
@@ -118,7 +116,7 @@ async function updateMessage(chatId, messageIndex, updates) {
 async function getAllChatSessions() {
     try {
         const rows = await electronAPI.db.query(
-            'SELECT * FROM chat_sessions ORDER BY last_updated DESC'
+            SQL.SELECT_ALL_CHAT_SESSIONS
         );
 
         // 转换数据格式为应用中使用的格式
@@ -139,7 +137,7 @@ async function getAllChatSessions() {
 async function getMessagesForChat(chatId) {
     try {
         const rows = await electronAPI.db.query(
-            'SELECT * FROM messages WHERE chat_id = ? ORDER BY timestamp ASC',
+            SQL.SELECT_MESSAGES_BY_CHAT_ID,
             [chatId]
         );
 
@@ -167,13 +165,13 @@ async function deleteChatSession(chatId) {
     try {
         // 首先删除该会话的所有消息
         await electronAPI.db.run(
-            'DELETE FROM messages WHERE chat_id = ?',
+            SQL.DELETE_MESSAGES_BY_CHAT_ID,
             [chatId]
         );
 
         // 然后删除会话本身
         await electronAPI.db.run(
-            'DELETE FROM chat_sessions WHERE id = ?',
+            SQL.DELETE_CHAT_SESSION,
             [chatId]
         );
         
