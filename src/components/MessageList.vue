@@ -52,6 +52,7 @@ const scrollToBottom = () => {
   height: 100%;
   overflow-y: auto;
   overflow-x: hidden;
+  padding: 0 40px;
   scroll-behavior: smooth; /* 添加平滑滚动 */
 }
 

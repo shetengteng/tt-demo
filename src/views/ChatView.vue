@@ -87,21 +87,24 @@ html, body {
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  position: relative;
 }
 
 .messages-wrapper {
   flex: 1;
   overflow: hidden;
   position: relative;
+  padding-bottom: 120px;
 }
 
 .input-wrapper {
-  flex-shrink: 0;
-  position: relative;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
   z-index: 10;
-  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
-  background-color: var(--chat-bg-color, #ffffff);
-  border-top: 1px solid var(--border-color, #e0e0e0);
+  background-color: transparent;
+  padding: 0 40px 20px 40px;
 }
 
 /* 移除被深度组件继承的样式 */
@@ -121,6 +124,15 @@ html, body {
 }
 
 :deep(.el-splitter__bar:hover) {
+  background-color: var(--primary-color, #4a82f0);
+}
+
+/* Dark theme splitter bar overrides */
+.dark-theme :deep(el-splitter-bar__dragger:before) {
+  background-color: var(--border-color, #333333);
+}
+
+.dark-theme :deep(.el-splitter__bar:hover) {
   background-color: var(--primary-color, #4a82f0);
 }
 

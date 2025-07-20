@@ -115,28 +115,6 @@ watch(() => props.content, () => {
   background-color: transparent !important;
 }
 
-/* 确保深色模式下的文字更加清晰 */
-.dark-theme :deep(.markdown-body) {
-  color: var(--text-color) !important;
-}
-
-.dark-theme :deep(.markdown-body h1),
-.dark-theme :deep(.markdown-body h2),
-.dark-theme :deep(.markdown-body h3),
-.dark-theme :deep(.markdown-body h4),
-.dark-theme :deep(.markdown-body h5),
-.dark-theme :deep(.markdown-body h6) {
-  color: var(--text-color) !important;
-}
-
-.dark-theme :deep(.markdown-body p) {
-  color: var(--text-color) !important;
-}
-
-.dark-theme :deep(.markdown-body li) {
-  color: var(--text-color) !important;
-}
-
 /* 更新代码块样式 */
 :deep(pre) {
   padding: 8px;

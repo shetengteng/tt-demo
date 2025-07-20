@@ -1,12 +1,18 @@
 <template>
   <div class="input-area">
-    <div class="top-controls">
+    <div class="input-row">
+      <el-input
+        v-model="inputMessage"
+        placeholder="What are the best open oppor"
+        @keyup.enter="sendMessage"
+        class="message-input"
+      ></el-input>
+    </div>
+    <div class="action-row">
       <el-select 
         v-model="selectedModel" 
-        size="small" 
-        placeholder="选择模型"
-        @change="changeModel"
-        class="model-selector">
+        placeholder="Select Source"
+        class="source-selector">
         <el-option
           v-for="model in availableModels"
           :key="model.value"
@@ -14,14 +20,20 @@
           :value="model.value"
         />
       </el-select>
-    </div>
-    <div class="input-controls">
-      <el-input
-        v-model="inputMessage"
-        placeholder="输入消息..."
-        @keyup.enter="sendMessage"
-      ></el-input>
-      <el-button type="primary" @click="sendMessage">发送</el-button>
+      <div class="button-group">
+        <el-button class="action-btn" plain>
+          <i :class="getIconClass('attachment')"></i>
+          Attach
+        </el-button>
+        <el-button class="action-btn" plain>
+          <i :class="getIconClass('mic')"></i>
+          Voice
+        </el-button>
+        <el-button type="primary" class="send-btn" @click="sendMessage">
+          <i :class="getIconClass('send')"></i>
+          Send
+        </el-button>
+      </div>
     </div>
   </div>
 </template>
@@ -29,7 +41,9 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { availableModels } from '@/utils/api';
+import { useIcon } from '@/composables/useIcon';
 
+const { getIconClass } = useIcon();
 const inputMessage = ref('');
 const selectedModel = ref('');
 const emit = defineEmits(['send-message', 'change-model']);
@@ -54,43 +68,81 @@ const changeModel = () => {
 
 <style scoped>
 .input-area {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
   padding: 16px;
   width: 100%;
   box-sizing: border-box;
   background-color: var(--chat-bg-color, #ffffff);
+  border-radius: 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e0e0e0;
 }
 
-.top-controls {
+.input-row {
   display: flex;
-  justify-content: flex-end;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 12px;
 }
 
-.model-selector {
-  width: 180px;
+.source-selector {
+  width: 160px;
+  border-radius: 12px;
 }
 
-.input-controls {
+.message-input {
+  flex: 1;
+}
+
+.action-row {
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.button-group {
   display: flex;
   gap: 8px;
 }
 
-.el-input {
-  flex: 1;
+.action-btn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  border-radius: 12px;
+  padding: 8px 16px;
+  background-color: transparent;
+}
+
+.action-btn i {
+  font-size: 18px;
+}
+
+.send-btn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  border-radius: 12px;
+  padding: 8px 16px;
+  background-color: #000033;
+}
+
+.send-btn i {
+  font-size: 18px;
 }
 
 /* Element UI 主题适配 */
 :deep(.el-input__wrapper) {
   background-color: var(--card-bg, #f5f5f5);
-  border-color: var(--border-color, #d0d0d0);
-  color: var(--text-color, #000000);
+  border-color: transparent;
+  border-radius: 12px;
+  box-shadow: none;
 }
 
 :deep(.el-input__inner) {
   color: var(--text-color, #000000);
   background-color: transparent;
+  font-size: 14px;
 }
 
 :deep(.el-input__inner::placeholder) {
@@ -99,30 +151,30 @@ const changeModel = () => {
 
 :deep(.el-select__wrapper) {
   background-color: var(--card-bg, #f5f5f5);
-  border-color: var(--border-color, #d0d0d0);
-  color: var(--text-color, #000000);
+  border-color: transparent;
+  border-radius: 12px;
+  box-shadow: none;
 }
 
-:deep(.el-select__inner) {
-  color: var(--text-color, #000000);
-  background-color: transparent;
+:deep(.el-button) {
+  border: 1px solid #e0e0e0;
+  font-weight: 500;
 }
 
 :deep(.el-button--primary) {
-  background-color: var(--primary-color, #4a82f0);
-  border-color: var(--primary-color, #4a82f0);
+  background-color: #000033;
+  border-color: #000033;
   color: white;
 }
 
 :deep(.el-button--primary:hover) {
-  background-color: var(--new-chat-hover-bg, #0056cc);
-  border-color: var(--new-chat-hover-bg, #0056cc);
+  background-color: #000066;
+  border-color: #000066;
 }
 
 /* Dark theme overrides */
 .dark-theme :deep(.el-input__wrapper) {
   background-color: var(--card-bg, #3a3a3a);
-  border-color: var(--border-color, #666666);
   color: var(--text-color, #d0d0d0);
 }
 
@@ -132,11 +184,6 @@ const changeModel = () => {
 
 .dark-theme :deep(.el-select__wrapper) {
   background-color: var(--card-bg, #3a3a3a);
-  border-color: var(--border-color, #666666);
-  color: var(--text-color, #d0d0d0);
-}
-
-.dark-theme :deep(.el-select__inner) {
   color: var(--text-color, #d0d0d0);
 }
 

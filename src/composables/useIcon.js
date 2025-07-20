@@ -41,7 +41,12 @@ const iconMap = {
     info: 'ri-information-line',
     user_plus: 'ri-user-add-line',
     keyboard: 'ri-keyboard-line',
-    github: 'ri-github-fill'
+    github: 'ri-github-fill',
+    
+    // 消息输入图标
+    attachment: 'ri-attachment-2-line',
+    mic: 'ri-mic-line',
+    send: 'ri-send-plane-fill'
 };
 
 export function useIcon() {
