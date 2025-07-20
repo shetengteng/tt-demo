@@ -77,6 +77,24 @@ export function useMessageHandler() {
     }
   };
 
+  // 添加重命名聊天函数
+  const renameChat = (data) => {
+    const { id, title } = data;
+    const chat = chatSessions.value.find(chat => chat.id === id);
+    
+    if (chat && title.trim()) {
+      // 更新标题
+      chat.title = title.trim();
+      chat.lastUpdated = Date.now();
+      
+      // 保存会话列表
+      saveChatSessions();
+      
+      // 提示重命名成功
+      ElMessage.success('聊天记录已重命名');
+    }
+  };
+
   // 保存所有聊天会话
   const saveChatSessions = () => {
     localStorage.setItem('chatSessions', JSON.stringify(chatSessions.value));
@@ -320,6 +338,7 @@ export function useMessageHandler() {
     currentChatId,
     createNewChat,
     selectChat,
-    deleteChat
+    deleteChat,
+    renameChat
   };
 }

@@ -7,6 +7,7 @@
       @new-chat="createNewChat"
       @select-chat="selectChat"
       @delete-chat="deleteChat"
+      @rename-chat="renameChat"
       class="chat-records-list"
     />
     
@@ -39,7 +40,8 @@ const {
   currentChatId, 
   createNewChat, 
   selectChat,
-  deleteChat
+  deleteChat,
+  renameChat
 } = useMessageHandler();
 </script>
 
