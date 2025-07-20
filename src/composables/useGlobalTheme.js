@@ -1,4 +1,4 @@
-import { ref, watch } from 'vue';
+import { ref, watch, computed } from 'vue';
 
 // 全局主题状态
 export const globalDarkMode = ref(false);
@@ -37,10 +37,14 @@ export const useGlobalTheme = () => {
     const setTheme = (isDark) => {
         globalDarkMode.value = isDark;
     };
+    
+    // 当前主题计算属性
+    const currentTheme = computed(() => globalDarkMode.value ? 'dark' : 'light');
 
     return {
         darkMode: globalDarkMode,
         toggleTheme,
-        setTheme
+        setTheme,
+        currentTheme
     };
 }; 

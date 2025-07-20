@@ -1,13 +1,15 @@
 <template>
   <div class="chat-container" v-if="isMounted">
-    <ChatSidebar 
+    <!-- 聊天记录列表 -->
+    <ChatRecordList 
       :chat-sessions="chatSessions"
       :current-chat-id="currentChatId"
       @new-chat="createNewChat"
       @select-chat="selectChat"
       @delete-chat="deleteChat"
-      class="chat-sidebar"
+      class="chat-records-list"
     />
+    
     <div class="chat-main">
       <div class="messages-wrapper">
         <MessageList :messages="messages"/>
@@ -25,7 +27,7 @@
 <script setup>
 import MessageList from '../components/MessageList.vue';
 import MessageInput from '../components/MessageInput.vue';
-import ChatSidebar from '../components/ChatSidebar.vue';
+import ChatRecordList from '../components/ChatRecordList.vue';
 import {useMessageHandler} from '../composables/useMessageHandler';
 
 const {
@@ -65,7 +67,7 @@ html, body {
   overflow: hidden; /* 防止整个容器出现额外的滚动条 */
 }
 
-.chat-sidebar {
+.chat-records-list {
   flex-shrink: 0;
 }
 

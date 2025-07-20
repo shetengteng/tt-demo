@@ -1,44 +1,59 @@
 <template>
   <div class="chat-sidebar">
-    <div class="sidebar-header">
-      <h3>聊天记录</h3>
-      <el-button 
-        type="primary" 
-        size="small" 
-        circle 
-        @click="createNewChat"
-        class="new-chat-btn"
-      >
-        <i class="el-icon-plus">+</i>
-      </el-button>
-    </div>
-    
-    <div class="chat-list">
-      <div 
-        v-for="chat in chatSessions" 
-        :key="chat.id"
-        class="chat-item"
-        :class="{ active: currentChatId === chat.id }"
-      >
-        <div class="chat-content" @click="selectChat(chat.id)">
-          <div class="chat-title">{{ chat.title || '新的聊天' }}</div>
-          <div class="chat-time">{{ formatTime(chat.lastUpdated) }}</div>
+    <!-- 图标菜单项 -->
+    <div class="sidebar-icons">
+      <!-- 顶部图标组 -->
+      <div class="icon-group top">
+        <!-- 蓝色圆形图标 -->
+        <div class="sidebar-icon blue-circle">
+          <div class="circle"></div>
         </div>
-        <div class="chat-actions">
-          <el-button
-            class="delete-btn"
-            type="danger"
-            size="small"
-            circle
-            @click.stop="confirmDelete(chat.id)"
-          >
-            <i class="el-icon-delete">×</i>
-          </el-button>
+        
+        <!-- 聊天图标 - 确保这个是active的状态 -->
+        <div class="sidebar-icon" :class="{ active: currentRoute === '/' || currentRoute === '/chat' }" @click="navigateTo('/chat')">
+          <div class="icon-bg">
+            <FontAwesomeIcon icon="message" />
+          </div>
+        </div>
+        
+        <!-- 耳机图标 -->
+        <div class="sidebar-icon" :class="{ active: currentRoute === '/support' }" @click="navigateTo('/support')">
+          <FontAwesomeIcon icon="headset" />
+        </div>
+        
+        <!-- 闪电图标 -->
+        <div class="sidebar-icon" :class="{ active: currentRoute === '/actions' }" @click="navigateTo('/actions')">
+          <FontAwesomeIcon icon="bolt" />
+        </div>
+        
+        <!-- 加号图标 -->
+        <div class="sidebar-icon" @click="createNewChat">
+          <FontAwesomeIcon icon="plus" />
+        </div>
+        
+        <!-- 日历图标 -->
+        <div class="sidebar-icon" :class="{ active: currentRoute === '/calendar' }" @click="navigateTo('/calendar')">
+          <FontAwesomeIcon icon="calendar" />
+        </div>
+        
+        <!-- 设置图标 -->
+        <div class="sidebar-icon" :class="{ active: currentRoute === '/settings' }" @click="navigateTo('/settings')">
+          <FontAwesomeIcon icon="cog" />
         </div>
       </div>
       
-      <div v-if="chatSessions.length === 0" class="empty-state">
-        暂无聊天记录
+      <!-- 底部图标组 -->
+      <div class="icon-group bottom">
+        <!-- 用户图标带New标记 -->
+        <div class="sidebar-icon" :class="{ active: currentRoute === '/profile' }" @click="navigateTo('/profile')">
+          <FontAwesomeIcon icon="user" />
+          <span class="new-badge">New</span>
+        </div>
+        
+        <!-- 主题切换图标 -->
+        <div class="sidebar-icon theme-toggle" @click="toggleTheme">
+          <FontAwesomeIcon :icon="darkMode ? 'moon' : 'sun'" />
+        </div>
       </div>
     </div>
   </div>
@@ -46,159 +61,114 @@
 
 <script setup>
 import { computed, ref } from 'vue';
-import { ElMessageBox } from 'element-plus';
+import { useGlobalTheme } from '../composables/useGlobalTheme';
+import { useRouter } from 'vue-router';
 
-const props = defineProps({
-  chatSessions: {
-    type: Array,
-    required: true
-  },
-  currentChatId: {
-    type: String,
-    required: true
-  }
-});
+const router = useRouter();
+const { toggleTheme, currentTheme, darkMode } = useGlobalTheme();
 
-const emit = defineEmits(['new-chat', 'select-chat', 'delete-chat']);
+// 获取当前路由
+const currentRoute = computed(() => router.currentRoute.value.path);
 
+// 导航函数
+const navigateTo = (path) => {
+  router.push(path);
+};
+
+// 创建新聊天
 const createNewChat = () => {
-  emit('new-chat');
-};
-
-const selectChat = (chatId) => {
-  emit('select-chat', chatId);
-};
-
-// 确认删除对话框
-const confirmDelete = (chatId) => {
-  ElMessageBox.confirm(
-    '确定要删除此聊天记录吗？此操作无法恢复。',
-    '删除确认',
-    {
-      confirmButtonText: '确定删除',
-      cancelButtonText: '取消',
-      type: 'warning',
-    }
-  )
-    .then(() => {
-      emit('delete-chat', chatId);
-    })
-    .catch(() => {
-      // 用户取消删除操作
-    });
-};
-
-// 格式化时间
-const formatTime = (timestamp) => {
-  if (!timestamp) return '';
-  
-  const date = new Date(timestamp);
-  const now = new Date();
-  
-  // 同一天显示时间，不同天显示日期
-  if (date.toDateString() === now.toDateString()) {
-    return date.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
-  } else {
-    return date.toLocaleDateString('zh-CN', { month: '2-digit', day: '2-digit' });
-  }
+  // 模拟创建新聊天的操作
+  router.push('/chat');
 };
 </script>
 
 <style scoped>
 .chat-sidebar {
-  width: 250px;
+  width: 60px;
   height: 100%;
-  background-color: var(--sidebar-bg-color, #f5f5f5);
-  border-right: 1px solid var(--border-color, #e0e0e0);
+  background-color: var(--sidebar-bg-color, #ffffff);
+  border-right: 1px solid var(--border-color, #f0f0f0);
   display: flex;
   flex-direction: column;
-}
-
-.sidebar-header {
-  padding: 16px;
-  display: flex;
-  justify-content: space-between;
   align-items: center;
-  border-bottom: 1px solid var(--border-color, #e0e0e0);
+  padding: 10px 0;
 }
 
-.sidebar-header h3 {
-  margin: 0;
-  font-size: 16px;
-  font-weight: 500;
+.sidebar-icons {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  justify-content: space-between;
 }
 
-.chat-list {
-  flex: 1;
-  overflow-y: auto;
-  padding: 8px;
+.icon-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  width: 100%;
 }
 
-.chat-item {
-  padding: 8px;
-  border-radius: 8px;
-  margin-bottom: 8px;
+.top {
+  margin-top: 10px;
+}
+
+.bottom {
+  margin-bottom: 20px;
+}
+
+.sidebar-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   cursor: pointer;
-  transition: background-color 0.2s;
   position: relative;
+  color: var(--icon-color, #666);
+  font-size: 16px;
+  transition: all 0.2s ease;
+}
+
+.sidebar-icon:hover {
+  color: var(--primary-color, #4a82f0);
+  transform: scale(1.05);
+}
+
+.sidebar-icon.active .icon-bg {
+  background-color: #000020;
+  color: white;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
 }
 
-.chat-item:hover {
-  background-color: var(--hover-color, #e9e9e9);
+.blue-circle .circle {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #6496ff, #4a7cf0);
 }
 
-.chat-item.active {
-  background-color: var(--active-color, #e6f7ff);
+.new-badge {
+  position: absolute;
+  bottom: -5px;
+  right: -5px;
+  background-color: #4a7cf0;
+  color: white;
+  font-size: 8px;
+  padding: 2px 4px;
+  border-radius: 8px;
+  font-weight: bold;
 }
 
-.chat-content {
-  flex: 1;
-  min-width: 0;
-  padding: 4px 8px;
-}
-
-.chat-title {
-  font-size: 14px;
-  margin-bottom: 4px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.chat-time {
-  font-size: 12px;
-  color: var(--secondary-text-color, #999);
-}
-
-.chat-actions {
-  opacity: 0;
-  transition: opacity 0.2s;
-}
-
-.chat-item:hover .chat-actions {
-  opacity: 1;
-}
-
-.delete-btn {
-  min-height: 24px;
-  min-width: 24px;
-  font-size: 12px;
-  padding: 0;
-}
-
-.empty-state {
-  text-align: center;
-  padding: 24px 0;
-  color: var(--secondary-text-color, #999);
-  font-size: 14px;
-}
-
-.new-chat-btn {
-  min-height: 32px;
-  min-width: 32px;
-  font-size: 16px;
+.theme-toggle {
+  margin-top: 20px;
 }
 </style> 
