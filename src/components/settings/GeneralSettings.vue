@@ -22,13 +22,48 @@
         </el-button>
       </div>
     </div>
+
+    <el-button type="primary" @click="saveSettings">
+      保存设置
+    </el-button>
   </div>
 </template>
 
 <script setup>
+import { ref, onMounted } from 'vue';
 import { useIcon } from '@/composables/useIcon';
+import { saveConfig, getConfig } from '@/utils/db';
+import { ElMessage } from 'element-plus';
 
 const { getIconClass } = useIcon();
+const settings = ref({
+  // 默认设置值
+  accountEnabled: true,
+  teamInvitesEnabled: true
+});
+
+// 在组件加载时获取设置
+onMounted(async () => {
+  try {
+    const savedSettings = await getConfig('generalSettings', null);
+    if (savedSettings) {
+      settings.value = { ...settings.value, ...savedSettings };
+    }
+  } catch (error) {
+    console.error('加载通用设置失败:', error);
+  }
+});
+
+// 保存设置
+const saveSettings = async () => {
+  try {
+    await saveConfig('generalSettings', settings.value);
+    ElMessage.success('通用设置已保存');
+  } catch (error) {
+    console.error('保存通用设置失败:', error);
+    ElMessage.error('保存设置失败');
+  }
+};
 </script>
 
 <style scoped>

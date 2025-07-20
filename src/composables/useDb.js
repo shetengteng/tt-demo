@@ -1,8 +1,11 @@
 // src/composables/useDb.js - 数据库操作封装模块
-const { app, ipcMain } = require('electron');
-const path = require('path');
-const sqlite3 = require('sqlite3').verbose();
-const { SQL } = require('./sqlConstants');
+import { app, ipcMain } from 'electron';
+import path from 'path';
+import sqlite3 from 'sqlite3';
+import { SQL } from './sqlConstants.js';
+
+// 启用详细日志
+const sqlite = sqlite3.verbose();
 
 let db = null;
 
@@ -11,52 +14,67 @@ const getDbPath = () => {
     return path.join(app.getPath('userData'), 'chats.db');
 };
 
+// 将 db.run 转换为返回 Promise 的函数
+const runAsync = (sql, params = []) => {
+    return new Promise((resolve, reject) => {
+        db.run(sql, params, function (err) {
+            if (err) {
+                reject(err);
+                return;
+            }
+            resolve({
+                lastID: this.lastID,
+                changes: this.changes
+            });
+        });
+    });
+};
+
 // 初始化数据库
 const initDatabase = () => {
     // 设置IPC处理程序 - 数据库相关
     ipcMain.handle('db:init', async () => {
-        return new Promise((resolve, reject) => {
+        try {
             const dbPath = getDbPath();
             console.log('初始化数据库:', dbPath);
 
-            db = new sqlite3.Database(dbPath, (err) => {
-                if (err) {
-                    console.error('无法打开数据库:', err.message);
-                    reject(err);
-                    return;
-                }
-
-                console.log('已连接到SQLite数据库');
-
-                // 创建聊天会话表
-                db.run(SQL.CREATE_CHAT_SESSIONS_TABLE, (err) => {
+            // 打开数据库连接
+            db = await new Promise((resolve, reject) => {
+                const database = new sqlite.Database(dbPath, (err) => {
                     if (err) {
-                        console.error('创建chat_sessions表失败:', err.message);
+                        console.error('无法打开数据库:', err.message);
                         reject(err);
                         return;
                     }
-
-                    // 创建消息表
-                    db.run(SQL.CREATE_MESSAGES_TABLE, (err) => {
-                        if (err) {
-                            console.error('创建messages表失败:', err.message);
-                            reject(err);
-                            return;
-                        }
-
-                        console.log('数据库初始化完成');
-                        resolve({ success: true });
-                    });
+                    console.log('已连接到SQLite数据库');
+                    resolve(database);
                 });
             });
-        });
+
+            // 依次创建所有表
+            const tables = [
+                SQL.CREATE_CHAT_SESSIONS_TABLE, 
+                SQL.CREATE_MESSAGES_TABLE, 
+                SQL.CREATE_CONFIGS_TABLE
+            ];
+            
+            for (const tableSql of tables) {
+                await runAsync(tableSql);
+            }
+            
+            console.log('数据库初始化完成');
+            return { success: true };
+        } catch (error) {
+            console.error('数据库初始化失败:', error.message);
+            throw error;
+        }
     });
 
     // 执行查询
     ipcMain.handle('db:query', async (event, sql, params = []) => {
         if (!db) {
             const dbPath = getDbPath();
-            db = new sqlite3.Database(dbPath);
+            db = new sqlite.Database(dbPath);
         }
 
         return new Promise((resolve, reject) => {
@@ -75,22 +93,10 @@ const initDatabase = () => {
     ipcMain.handle('db:run', async (event, sql, params = []) => {
         if (!db) {
             const dbPath = getDbPath();
-            db = new sqlite3.Database(dbPath);
+            db = new sqlite.Database(dbPath);
         }
 
-        return new Promise((resolve, reject) => {
-            db.run(sql, params, function (err) {
-                if (err) {
-                    console.error('操作失败:', err.message);
-                    reject(err);
-                    return;
-                }
-                resolve({
-                    lastID: this.lastID,
-                    changes: this.changes
-                });
-            });
-        });
+        return runAsync(sql, params);
     });
 
     // 路径连接操作
@@ -109,7 +115,7 @@ const closeDatabase = () => {
 };
 
 // 导出模块
-module.exports = {
+export {
     initDatabase,
     closeDatabase
 }; 

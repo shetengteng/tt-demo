@@ -25,23 +25,38 @@ const SQL = {
       FOREIGN KEY (chat_id) REFERENCES chat_sessions (id) ON DELETE CASCADE
     )
   `,
+  CREATE_CONFIGS_TABLE: `
+    CREATE TABLE IF NOT EXISTS app_configs (
+      key TEXT PRIMARY KEY,
+      value TEXT NOT NULL,
+      updated_at INTEGER NOT NULL
+    )
+  `,
   SELECT_MESSAGES_BY_CHAT_ID: 'SELECT * FROM messages WHERE chat_id = ? ORDER BY timestamp ASC',
   SELECT_ALL_CHAT_SESSIONS: 'SELECT * FROM chat_sessions ORDER BY last_updated DESC',
+  SELECT_CONFIG: 'SELECT value FROM app_configs WHERE key = ?',
+  SELECT_ALL_CONFIGS: 'SELECT * FROM app_configs',
   INSERT_MESSAGE: `
     INSERT INTO messages (
       chat_id, content, reasoning_content, is_user, 
       is_system, model, timestamp, is_reasoning_model, reasoning_complete
     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
   `,
+  UPSERT_CONFIG: `
+    INSERT OR REPLACE INTO app_configs (key, value, updated_at)
+    VALUES (?, ?, ?)
+  `,
   DELETE_MESSAGES_BY_CHAT_ID: 'DELETE FROM messages WHERE chat_id = ?',
-  DELETE_CHAT_SESSION: 'DELETE FROM chat_sessions WHERE id = ?'
+  DELETE_CHAT_SESSION: 'DELETE FROM chat_sessions WHERE id = ?',
+  DELETE_CONFIG: 'DELETE FROM app_configs WHERE key = ?'
 };
 
-// 兼容CommonJS和ES模块导出
-if (typeof module !== 'undefined') {
-  // Node.js环境
+// 检查是否在Node.js环境中运行
+if (typeof module !== 'undefined' && module.exports) {
+  // Node.js/CommonJS环境
   module.exports = { SQL };
-} 
+}
 
-// 浏览器环境ES模块导出
-export { SQL }; 
+// 默认导出，支持ESM
+export { SQL };
+export default { SQL }; 

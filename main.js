@@ -1,6 +1,11 @@
-const { app, BrowserWindow, ipcMain } = require('electron');
-const path = require('path');
-const { initDatabase, closeDatabase } = require('./src/composables/useDb');
+import { app, BrowserWindow, ipcMain } from 'electron';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import { initDatabase, closeDatabase } from './src/composables/useDb.js';
+
+// 获取 __dirname 的 ES 模块替代品
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 let mainWindow = null;
 
@@ -17,7 +22,7 @@ if (!gotTheLock) {
       minWidth: 800,
       minHeight: 600,
       webPreferences: {
-        preload: path.join(__dirname, 'preload.js'),
+        preload: path.join(__dirname, 'preload.cjs'),
         nodeIntegration: false,
         contextIsolation: true,
         sandbox: false

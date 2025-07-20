@@ -32,18 +32,10 @@
           <GeneralSettings v-if="activeSection === 'general'" />
 
           <!-- API 设置区域 -->
-          <ApiSettings 
-            v-if="activeSection === 'api'" 
-            :initial-api-key="apiKey"
-            :initial-model="selectedModel"
-            @save="handleApiSettingsSave"
-          />
+          <ApiSettings v-if="activeSection === 'api'" />
 
           <!-- 外观设置区域 -->
-          <AppearanceSettings 
-            v-if="activeSection === 'appearance'" 
-            v-model:dark-mode="darkMode"
-          />
+          <AppearanceSettings v-if="activeSection === 'appearance'" />
           
           <!-- 关于区域 -->
           <AboutSettings v-if="activeSection === 'about'" />
@@ -54,10 +46,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
-import { ElMessage } from 'element-plus';
-import { useGlobalTheme } from '@/composables/useGlobalTheme';
-import { availableModels } from '@/utils/api';
+import { ref } from 'vue';
 import { useIcon } from '@/composables/useIcon';
 
 // 导入设置组件
@@ -67,13 +56,10 @@ import AppearanceSettings from '@/components/settings/AppearanceSettings.vue';
 import AboutSettings from '@/components/settings/AboutSettings.vue';
 
 const { getIconClass } = useIcon();
-const apiKey = ref('');
-const selectedModel = ref('deepseek-chat');
-const { darkMode } = useGlobalTheme();
 const activeSection = ref('general');
 const isMounted = ref(true);
 
-// 侧边栏JSON配置
+// 侧边栏JSON配置（保持在代码中，不存入数据库）
 const sidebarItems = [
   {
     section: 'general',
@@ -102,21 +88,6 @@ const sectionTitles = {
   api: 'API 设置',
   appearance: '外观设置',
   about: '关于'
-};
-
-onMounted(() => {
-  // 加载已保存的设置
-  const savedKey = localStorage.getItem('apiKey');
-  if (savedKey) apiKey.value = savedKey;
-  
-  // 加载保存的模型选择
-  const savedModel = localStorage.getItem('selectedModel');
-  if (savedModel) selectedModel.value = savedModel;
-});
-
-const handleApiSettingsSave = (settings) => {
-  apiKey.value = settings.apiKey;
-  selectedModel.value = settings.selectedModel;
 };
 </script>
 

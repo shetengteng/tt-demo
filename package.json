@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "A simple AI chat desktop application with custom API key support",
   "main": "main.js",
+  "type": "module",
   "scripts": {
     "start": "concurrently \"vite\" \"wait-on http://localhost:5173 && NODE_ENV=development electron .\"",
     "postinstall": "electron-builder install-app-deps"

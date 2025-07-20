@@ -40,48 +40,65 @@
 import { ref, onMounted } from 'vue';
 import { ElMessage } from 'element-plus';
 import { availableModels } from '@/utils/api';
+import { saveConfig, getConfig } from '@/utils/db';
 
-const props = defineProps({
-  initialApiKey: {
-    type: String,
-    default: ''
-  },
-  initialModel: {
-    type: String,
-    default: 'deepseek-chat'
+const apiKey = ref('');
+const selectedModel = ref('deepseek-chat');
+
+onMounted(async () => {
+  try {
+    // 从数据库加载API密钥
+    const savedKey = await getConfig('apiKey', '');
+    if (savedKey) {
+      apiKey.value = savedKey;
+    } else {
+      // 向后兼容：从localStorage加载
+      const localStorageKey = localStorage.getItem('apiKey');
+      if (localStorageKey) {
+        apiKey.value = localStorageKey;
+        // 迁移到数据库
+        await saveConfig('apiKey', localStorageKey);
+      }
+    }
+    
+    // 从数据库加载模型选择
+    const savedModel = await getConfig('selectedModel', 'deepseek-chat');
+    if (savedModel) {
+      selectedModel.value = savedModel;
+    } else {
+      // 向后兼容：从localStorage加载
+      const localStorageModel = localStorage.getItem('selectedModel');
+      if (localStorageModel) {
+        selectedModel.value = localStorageModel;
+        // 迁移到数据库
+        await saveConfig('selectedModel', localStorageModel);
+      }
+    }
+  } catch (error) {
+    console.error('加载API设置失败:', error);
   }
 });
 
-const emit = defineEmits(['save']);
-
-const apiKey = ref(props.initialApiKey);
-const selectedModel = ref(props.initialModel);
-
-onMounted(() => {
-  // 加载已保存的设置
-  const savedKey = localStorage.getItem('apiKey');
-  if (savedKey) apiKey.value = savedKey;
-  
-  // 加载保存的模型选择
-  const savedModel = localStorage.getItem('selectedModel');
-  if (savedModel) selectedModel.value = savedModel;
-});
-
-const saveSettings = () => {
+const saveSettings = async () => {
   if (!apiKey.value.trim()) {
     ElMessage.warning('请输入有效的API密钥');
     return;
   }
 
-  localStorage.setItem('apiKey', apiKey.value);
-  localStorage.setItem('selectedModel', selectedModel.value);
-  
-  emit('save', {
-    apiKey: apiKey.value,
-    selectedModel: selectedModel.value
-  });
-  
-  ElMessage.success('设置已保存');
+  try {
+    // 保存到数据库
+    await saveConfig('apiKey', apiKey.value);
+    await saveConfig('selectedModel', selectedModel.value);
+    
+    // 为了向后兼容，也保存到localStorage
+    localStorage.setItem('apiKey', apiKey.value);
+    localStorage.setItem('selectedModel', selectedModel.value);
+    
+    ElMessage.success('API设置已保存');
+  } catch (error) {
+    console.error('保存API设置失败:', error);
+    ElMessage.error('保存设置失败');
+  }
 };
 </script>
 

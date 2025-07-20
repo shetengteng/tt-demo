@@ -19,7 +19,7 @@
         <p class="block-description">配置字体、格式化、迷你地图等</p>
       </div>
       <div class="block-content">
-        <el-button type="default" class="right-button">打开</el-button>
+        <el-button type="default" class="right-button" @click="saveSettings">保存设置</el-button>
       </div>
     </div>
     
@@ -36,25 +36,70 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch } from 'vue';
+import { ref, onMounted } from 'vue';
+import { useGlobalTheme } from '@/composables/useGlobalTheme';
+import { saveConfig, getConfig } from '@/utils/db';
+import { ElMessage } from 'element-plus';
 
-const props = defineProps({
-  darkMode: {
-    type: Boolean,
-    required: true
+const { darkMode, setTheme } = useGlobalTheme();
+const darkModeValue = ref(darkMode.value);
+const editorSettings = ref({
+  fontSize: 14,
+  fontFamily: 'Consolas, "Courier New", monospace',
+  minimap: true,
+  wordWrap: false
+});
+
+// 在组件加载时获取设置
+onMounted(async () => {
+  try {
+    // 从数据库加载外观设置
+    const savedSettings = await getConfig('appearanceSettings', null);
+    if (savedSettings) {
+      if (savedSettings.editorSettings) {
+        editorSettings.value = { ...editorSettings.value, ...savedSettings.editorSettings };
+      }
+      
+      // 处理暗黑模式设置
+      if (savedSettings.darkMode !== undefined) {
+        darkModeValue.value = savedSettings.darkMode;
+        setTheme(savedSettings.darkMode);
+      }
+    }
+  } catch (error) {
+    console.error('加载外观设置失败:', error);
   }
 });
 
-const emit = defineEmits(['update:darkMode']);
+// 切换暗黑模式
+const toggleDarkMode = async () => {
+  setTheme(darkModeValue.value);
+  await saveSettingsToDb();
+};
 
-const darkModeValue = ref(props.darkMode);
+// 保存设置
+const saveSettings = async () => {
+  await saveSettingsToDb();
+  ElMessage.success('外观设置已保存');
+};
 
-watch(() => props.darkMode, (newValue) => {
-  darkModeValue.value = newValue;
-});
-
-const toggleDarkMode = () => {
-  emit('update:darkMode', darkModeValue.value);
+// 保存设置到数据库
+const saveSettingsToDb = async () => {
+  try {
+    const settings = {
+      darkMode: darkModeValue.value,
+      editorSettings: editorSettings.value
+    };
+    await saveConfig('appearanceSettings', settings);
+    
+    // 为了向后兼容，也保存到localStorage
+    localStorage.setItem('darkMode', darkModeValue.value.toString());
+  } catch (error) {
+    console.error('保存外观设置失败:', error);
+    ElMessage.error('保存设置失败');
+    return false;
+  }
+  return true;
 };
 </script>
 

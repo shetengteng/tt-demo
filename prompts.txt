@@ -1,41 +1,10 @@
-中文回答
-----------
-    <div class="settings-sidebar">
-          <div class="sidebar-title">
-            <i :class="getIconClass('settings')" class="sidebar-icon"></i>
-            <span>设置</span>
-          </div>
-          <div 
-            class="sidebar-item" 
-            :class="{ active: activeSection === 'general' }"
-            @click="activeSection = 'general'"
-          >
-            <i :class="getIconClass('general')" class="item-icon"></i>
-            <span>通用设置</span>
-          </div>
-          <div 
-            class="sidebar-item" 
-            :class="{ active: activeSection === 'api' }"
-            @click="activeSection = 'api'"
-          >
-            <i :class="getIconClass('key')" class="item-icon"></i>
-            <span>API 设置</span>
-          </div>
-          <div 
-            class="sidebar-item" 
-            :class="{ active: activeSection === 'appearance' }"
-            @click="activeSection = 'appearance'"
-          >
-            <i :class="getIconClass('theme')" class="item-icon"></i>
-            <span>外观设置</span>
-          </div>
-          <div 
-            class="sidebar-item" 
-            :class="{ active: activeSection === 'about' }"
-            @click="activeSection = 'about'"
-          >
-            <i :class="getIconClass('info')" class="item-icon"></i>
-            <span>关于</span>
-          </div>
-        </div>
-        这里可以优化成一个json配置
+db.js:13 数据库初始化失败: TypeError: Cannot read properties of undefined (reading 'db')
+    at initDb (db.js:9:27)
+    at useMessageHandler.js:166:13
+    at chunk-XK54EQ6L.js?v=ce9a42bb:4931:40
+    at callWithErrorHandling (chunk-XK54EQ6L.js?v=ce9a42bb:2272:19)
+    at callWithAsyncErrorHandling (chunk-XK54EQ6L.js?v=ce9a42bb:2279:17)
+    at hook.__weh.hook.__weh (chunk-XK54EQ6L.js?v=ce9a42bb:4911:19)
+    at flushPostFlushCbs (chunk-XK54EQ6L.js?v=ce9a42bb:2457:28)
+    at flushJobs (chunk-XK54EQ6L.js?v=ce9a42bb:2499:5)
+还是报错
