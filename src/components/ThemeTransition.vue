@@ -1,7 +1,7 @@
 <template>
   <div class="theme-transition-container">
     <div 
-      v-if="isAnimating"
+      v-if="themeAnimationState.isAnimating"
       class="theme-transition-overlay"
       :style="overlayStyle"
       @animationend="onAnimationEnd"
@@ -10,37 +10,23 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { computed } from 'vue';
+import { useGlobalTheme } from '../composables/useGlobalTheme';
 
-const props = defineProps({
-  isAnimating: {
-    type: Boolean,
-    default: false
-  },
-  clickPosition: {
-    type: Object,
-    default: () => ({ x: 0, y: 0 })
-  },
-  isDarkMode: {
-    type: Boolean,
-    default: false
-  }
-});
-
-const emit = defineEmits(['animation-complete']);
+const { themeAnimationState, completeAnimation } = useGlobalTheme();
 
 const overlayStyle = computed(() => ({
-  left: `${props.clickPosition.x}px`,
-  top: `${props.clickPosition.y}px`,
-  background: props.isDarkMode 
+  left: `${themeAnimationState.value.clickPosition.x}px`,
+  top: `${themeAnimationState.value.clickPosition.y}px`,
+  background: themeAnimationState.value.targetTheme
     ? 'radial-gradient(circle, #1a1a1a 0%, #2d2d2d 50%, #1a1a1a 100%)'
     : 'radial-gradient(circle, #ffffff 0%, #f5f5f5 50%, #ffffff 100%)',
-  borderColor: props.isDarkMode ? '#4a82f0' : '#ffd700'
+  borderColor: themeAnimationState.value.targetTheme ? '#4a82f0' : '#ffd700'
 }));
 
 const onAnimationEnd = () => {
-  // 立即触发动画完成回调
-  emit('animation-complete');
+  // 动画完成后调用全局的completeAnimation方法
+  completeAnimation();
 };
 </script>
 
