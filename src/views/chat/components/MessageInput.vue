@@ -41,8 +41,8 @@
 
 <script setup>
   import { ref, onMounted } from 'vue'
-  import { availableModels } from '@/utils/api'
-  import { useIcon } from '@/composables/useIcon'
+  import { availableModels } from '@/utils/api.js'
+  import { useIcon } from '@/composables/useIcon.js'
 
   const { getIconClass } = useIcon()
   const inputMessage = ref('')

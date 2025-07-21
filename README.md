@@ -9,11 +9,13 @@
 项目已配置了完整的代码格式化工具：
 
 #### Prettier
+
 - 自动格式化代码风格
 - 支持Vue、JavaScript、CSS等文件
 - 配置文件：`.prettierrc`
 
 #### ESLint
+
 - 代码质量检查
 - Vue.js语法检查
 - 配置文件：`eslint.config.js`
@@ -34,6 +36,7 @@ npm run lint
 ### VSCode 配置
 
 项目包含 `.vscode/settings.json` 配置，启用：
+
 - 保存时自动格式化
 - ESLint自动修复
 - Prettier作为默认格式化工具
@@ -41,6 +44,7 @@ npm run lint
 ### 格式化规则
 
 #### Prettier 配置
+
 - 使用单引号
 - 不使用分号
 - 缩进使用2个空格
@@ -48,6 +52,7 @@ npm run lint
 - 箭头函数参数括号：避免
 
 #### ESLint 规则
+
 - Vue组件名可以是单个单词
 - 未使用变量警告
 - console语句警告
@@ -73,4 +78,4 @@ src/
 ├── styles/         # 样式文件
 ├── utils/          # 工具函数
 └── views/          # 页面组件
-``` 
+```

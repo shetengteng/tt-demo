@@ -1,5 +1,5 @@
 import { createRouter, createWebHashHistory } from 'vue-router'
-import ChatView from '@/views/ChatView.vue'
+import ChatView from '@/views/chat/index.vue'
 import SettingsView from '@/views/settings/index.vue'
 import KnowledgeView from '@/views/knowledge/index.vue'
 
