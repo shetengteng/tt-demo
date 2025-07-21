@@ -215,8 +215,7 @@ const getIconStyle = (chat) => {
 }
 
 .menu-dots {
-  color: var(--secondary-text-color, #999);
-  font-size: 16px;
+  font-size: 18px;
   padding: 4px;
   cursor: pointer;
 }
