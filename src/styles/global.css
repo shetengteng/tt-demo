@@ -7,6 +7,17 @@ body {
     'Microsoft YaHei', Arial, sans-serif;
 }
 
+/* 文本选择样式 */
+::selection {
+  background-color: rgba(74, 130, 240, 0.2); /* 浅蓝色半透明 */
+  color: var(--text-color, #000000);
+}
+
+::-moz-selection {
+  background-color: rgba(74, 130, 240, 0.2); /* Firefox 兼容 */
+  color: var(--text-color, #000000);
+}
+
 /* 全局 Element UI 主题适配 */
 .el-message {
   background-color: var(--card-bg, #f5f5f5) !important;
@@ -145,4 +156,15 @@ body {
 
 .dark-theme * {
   scrollbar-color: var(--border-color, #666666) var(--card-bg, #3a3a3a);
+}
+
+/* 深色模式下的文本选择样式 */
+.dark-theme ::selection {
+  background-color: rgba(74, 130, 240, 0.3); /* 深色模式下稍微深一点 */
+  color: var(--text-color, #d0d0d0);
+}
+
+.dark-theme ::-moz-selection {
+  background-color: rgba(74, 130, 240, 0.3);
+  color: var(--text-color, #d0d0d0);
 }

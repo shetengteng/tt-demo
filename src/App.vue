@@ -15,38 +15,36 @@
 </template>
 
 <script setup>
-  import ChatSidebar from './components/ChatSidebar.vue'
-  import ThemeTransition from './components/ThemeTransition.vue'
-  import { useAppInitializer } from './composables/useAppInitializer'
-  import { useRouter } from 'vue-router'
-  import { onMounted, onUnmounted } from 'vue'
+import ChatSidebar from './components/ChatSidebar.vue'
+import ThemeTransition from './components/ThemeTransition.vue'
+import { useAppInitializer } from './composables/useAppInitializer'
+import { onMounted, onUnmounted } from 'vue'
 
-  const router = useRouter()
-  const { initializeApp, cleanupApp } = useAppInitializer()
+const { initializeApp, cleanupApp } = useAppInitializer()
 
-  // 应用启动时初始化全局状态
-  onMounted(async () => {
-    try {
-      await initializeApp()
-    } catch (error) {
-      console.error('应用启动失败:', error)
-    }
-  })
+// 应用启动时初始化全局状态
+onMounted(async () => {
+  try {
+    await initializeApp()
+  } catch (error) {
+    console.error('应用启动失败:', error)
+  }
+})
 
-  // 应用关闭时清理全局状态
-  onUnmounted(() => {
-    cleanupApp()
-  })
+// 应用关闭时清理全局状态
+onUnmounted(() => {
+  cleanupApp()
+})
 </script>
 
 <style>
-  @import './styles/global.css';
+@import './styles/global.css';
 
-  .app-container {
-    height: 100vh;
-  }
+.app-container {
+  height: 100vh;
+}
 
-  .main-content {
-    padding: 0 !important;
-  }
+.main-content {
+  padding: 0 !important;
+}
 </style>
