@@ -217,7 +217,7 @@ export const updateChatTitle = async (chatId, message) => {
 }
 
 // 处理模型变更
-export const handleModelChange = async modelId => {
+export const handleModelChange = async () => {
   updateCurrentModel()
   ElMessage.success(`已切换到 ${currentModel.value} 模型`)
 

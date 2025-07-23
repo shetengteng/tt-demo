@@ -13,6 +13,7 @@
         v-model="selectedModel"
         placeholder="Select Source"
         class="source-selector"
+        @change="changeModel"
       >
         <el-option
           v-for="model in availableModels"
