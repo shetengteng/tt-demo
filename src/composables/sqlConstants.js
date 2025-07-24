@@ -44,6 +44,10 @@ const SQL = {
       is_system, model, timestamp, is_reasoning_model, reasoning_complete
     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
   `,
+  INSERT_OR_REPLACE_CHAT_SESSION: `
+    INSERT OR REPLACE INTO chat_sessions (id, title, created_at, last_updated) 
+    VALUES (?, ?, ?, ?)
+  `,
   UPSERT_CONFIG: `
     INSERT OR REPLACE INTO app_configs (key, value, updated_at)
     VALUES (?, ?, ?)

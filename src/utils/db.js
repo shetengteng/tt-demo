@@ -24,8 +24,7 @@ async function saveChatSession(chat) {
     }
 
     await electronAPI.db.run(
-      `INSERT OR REPLACE INTO chat_sessions (id, title, created_at, last_updated) 
-             VALUES (?, ?, ?, ?)`,
+      SQL.INSERT_OR_REPLACE_CHAT_SESSION,
       [chat.id, chat.title, chat.createdAt, chat.lastUpdated]
     )
     return true
