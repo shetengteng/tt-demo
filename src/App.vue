@@ -42,6 +42,7 @@ onUnmounted(() => {
 
 .app-container {
   height: 100vh;
+  overflow: hidden;
 }
 
 .main-content {

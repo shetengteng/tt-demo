@@ -257,212 +257,156 @@ export const handleSendMessage = async message => {
   // 更新当前模型信息
   updateCurrentModel()
 
-  // 如果没有当前会话ID或者会话不存在，创建一个新的
-  if (
-    !currentChatId.value ||
-    !chatSessions.value.find(chat => chat.id === currentChatId.value)
-  ) {
+  // 确保有当前会话
+  if (!currentChatId.value || !chatSessions.value.find(chat => chat.id === currentChatId.value)) {
     await createNewChat()
   }
 
-  // 找到当前会话
-  const currentChat = chatSessions.value.find(
-    chat => chat.id === currentChatId.value
-  )
+  const currentChat = chatSessions.value.find(chat => chat.id === currentChatId.value)
   if (!currentChat) return
 
-  // 添加用户消息
-  const userMsg = { content: message, isUser: true }
-  if (isMounted.value) {
+  try {
+    // 添加用户消息
+    const userMsg = { content: message, isUser: true }
     currentChat.messages.push(userMsg)
-
-    // 更新会话标题（如果是第一条消息）
     await updateChatTitle(currentChatId.value, userMsg)
-  }
-
-  // 保存消息到数据库
-  try {
     await saveMessage(currentChatId.value, userMsg)
-  } catch (error) {
-    console.error('保存用户消息失败:', error)
-  }
 
-  controller.value = new AbortController()
-  try {
-    // 检查当前模型是否是思维链模型
+    // 创建AI消息
     const modelId = localStorage.getItem('selectedModel') || 'deepseek-chat'
     const isReasoningModel = modelId === 'deepseek-reasoner'
-
-    // 创建响应式消息对象
-    let aiMsg
-
-    if (isReasoningModel) {
-      // 创建推理模型的消息，包含思考过程和最终答案
-      aiMsg = reactive({
-        reasoningContent: '', // 思考过程
-        reasoningComplete: false, // 标记思考过程是否完成
-        tempContent: '', // 临时存储动态显示的最终答案
-        content: '', // 最终完整答案
-        contentStarted: false, // 标记是否开始接收答案内容
-        isUser: false,
-        model: currentModel.value,
+    
+    const aiMsg = reactive({
+      content: '',
+      isUser: false,
+      model: currentModel.value,
+      ...(isReasoningModel && {
+        reasoningContent: '',
+        reasoningComplete: false,
+        tempContent: '',
+        contentStarted: false,
         isReasoningModel: true,
       })
-    } else {
-      // 创建普通模型的消息
-      aiMsg = reactive({
-        content: '',
-        isUser: false,
-        model: currentModel.value,
-      })
-    }
+    })
 
-    if (isMounted.value) {
-      currentChat.messages.push(aiMsg)
-      currentChat.lastUpdated = Date.now()
+    currentChat.messages.push(aiMsg)
+    currentChat.lastUpdated = Date.now()
+    await saveMessage(currentChatId.value, aiMsg)
+    await saveChatSession(currentChat)
 
-      // 保存AI消息到数据库
-      try {
-        await saveMessage(currentChatId.value, aiMsg)
-        await saveChatSession(currentChat)
-      } catch (error) {
-        console.error('保存AI消息失败:', error)
-      }
-    }
-
-    // 调用AI API并传入流式回调和中止信号
-    const result = await sendMessageToAI(
-      userMsg.content,
+    // 发送消息到AI
+    controller.value = new AbortController()
+    await sendMessageToAI(
+      message,
       async chunk => {
-        if (isMounted.value) {
-          const messageIndex = currentChat.messages.length - 1 // AI消息的索引
+        if (!isMounted.value) return
+        
+        if (isReasoningModel) {
+          handleReasoningModelChunk(aiMsg, chunk)
+        } else {
+          aiMsg.content += chunk.content
+        }
+        
+        // 定期更新数据库中的AI消息内容
+        try {
+          const messageIndex = currentChat.messages.length - 1
           const updates = {}
-
+          
           if (isReasoningModel) {
-            // 处理推理模型的响应
-            if (chunk.type === 'reasoning') {
-              // 思考过程内容
-              aiMsg.reasoningContent += chunk.content
-              updates.reasoningContent = aiMsg.reasoningContent
-            } else if (chunk.type === 'content') {
-              // 实时显示最终回答内容
-              aiMsg.tempContent += chunk.content
-              aiMsg.content = aiMsg.tempContent // 更新完整内容
-              updates.content = aiMsg.content
-            } else if (chunk.type === 'content_started') {
-              // 标记已开始接收答案内容
-              aiMsg.contentStarted = true
-            } else if (chunk.type === 'reasoning_complete') {
-              // 标记思考过程已完成
-              aiMsg.reasoningComplete = true
-              updates.reasoningComplete = true
-            }
+            if (aiMsg.reasoningContent) updates.reasoningContent = aiMsg.reasoningContent
+            if (aiMsg.content) updates.content = aiMsg.content
+            if (aiMsg.reasoningComplete) updates.reasoningComplete = aiMsg.reasoningComplete
           } else {
-            // 处理普通模型的响应
-            aiMsg.content += chunk.content
-            updates.content = aiMsg.content
+            if (aiMsg.content) updates.content = aiMsg.content
           }
-
-          // 每收到一定量的新内容就更新数据库
-          try {
+          
+          if (Object.keys(updates).length > 0) {
             await updateMessage(currentChatId.value, messageIndex, updates)
-          } catch (error) {
-            console.error('更新AI消息失败:', error)
           }
+        } catch (error) {
+          console.error('更新AI消息失败:', error)
         }
       },
       controller.value.signal
     )
 
-    // 最终处理，确保设置了reasoningComplete和保存最终内容
-    if (isReasoningModel && isMounted.value) {
-      // 标记思考过程完成
+    // 完成处理
+    if (isReasoningModel) {
       aiMsg.reasoningComplete = true
-      // 确保将临时存储的内容全部转移到最终内容
-      aiMsg.content = aiMsg.tempContent
-
-      // 更新数据库
+      aiMsg.content = aiMsg.tempContent || aiMsg.content
+      
+      // 最终更新数据库
       try {
-        await updateMessage(
-          currentChatId.value,
-          currentChat.messages.length - 1,
-          {
-            reasoningComplete: true,
-            content: aiMsg.content,
-          }
-        )
-      } catch (error) {
-        console.error('更新思考完成状态失败:', error)
-      }
-    }
-
-    // 更新会话的最后更新时间并保存
-    if (currentChat) {
-      currentChat.lastUpdated = Date.now()
-      try {
-        await saveChatSession(currentChat)
-      } catch (error) {
-        console.error('更新会话时间失败:', error)
-      }
-    }
-
-    // 重置loading状态
-    isLoading.value = false
-  } catch (error) {
-    // 重置loading状态
-    isLoading.value = false
-    if (error.name !== 'AbortError') {
-      // 更新AI消息为错误内容
-      const currentChat = chatSessions.value.find(
-        chat => chat.id === currentChatId.value
-      )
-      if (currentChat && currentChat.messages.length > 0) {
-        const aiMsg = currentChat.messages[currentChat.messages.length - 1]
-        if (!aiMsg.isUser) {
-          const errorMsg = `错误: ${error.message || '请求失败，请检查API密钥或网络连接'}`
-          if (aiMsg.isReasoningModel) {
-            aiMsg.content = errorMsg
-          } else {
-            aiMsg.content = errorMsg
-          }
-
-          // 更新数据库中的错误消息
-          try {
-            await updateMessage(
-              currentChatId.value,
-              currentChat.messages.length - 1,
-              {
-                content: errorMsg,
-              }
-            )
-          } catch (updateError) {
-            console.error('更新错误消息失败:', updateError)
-          }
-        }
-      }
-    } else if (isMounted.value) {
-      // 请求中止时移除未完成的AI消息
-      const currentChat = chatSessions.value.find(
-        chat => chat.id === currentChatId.value
-      )
-      if (
-        currentChat &&
-        currentChat.messages.length > 0 &&
-        !currentChat.messages[currentChat.messages.length - 1].isUser
-      ) {
         const messageIndex = currentChat.messages.length - 1
-        currentChat.messages.pop()
-
-        // 从数据库中删除这条未完成的消息
-        try {
-          await updateMessage(currentChatId.value, messageIndex, {
-            content: '用户已取消请求',
-          })
-        } catch (error) {
-          console.error('删除未完成消息失败:', error)
-        }
+        await updateMessage(currentChatId.value, messageIndex, {
+          reasoningComplete: true,
+          content: aiMsg.content,
+          reasoningContent: aiMsg.reasoningContent
+        })
+      } catch (error) {
+        console.error('更新最终AI消息失败:', error)
       }
     }
+
+    // 最终保存
+    currentChat.lastUpdated = Date.now()
+    await saveChatSession(currentChat)
+    
+  } catch (error) {
+    handleSendMessageError(error, currentChat)
+  } finally {
+    isLoading.value = false
+  }
+}
+
+// 处理推理模型的数据块
+const handleReasoningModelChunk = (aiMsg, chunk) => {
+  switch (chunk.type) {
+    case 'reasoning':
+      // 思考过程内容
+      aiMsg.reasoningContent += chunk.content
+      break
+    case 'content':
+      // 实时显示最终回答内容
+      aiMsg.tempContent = (aiMsg.tempContent || '') + chunk.content
+      aiMsg.content = aiMsg.tempContent // 更新完整内容
+      break
+    case 'content_started':
+      // 标记已开始接收答案内容
+      aiMsg.contentStarted = true
+      break
+    case 'reasoning_complete':
+      // 标记思考过程已完成
+      aiMsg.reasoningComplete = true
+      break
+  }
+}
+
+// 处理发送消息错误
+const handleSendMessageError = async (error, currentChat) => {
+  if (error.name === 'AbortError') {
+    // 用户取消请求，移除未完成的AI消息
+    if (currentChat.messages.length > 0 && !currentChat.messages[currentChat.messages.length - 1].isUser) {
+      currentChat.messages.pop()
+    }
+  } else {
+    // 其他错误，显示错误消息
+    const errorMsg = `错误: ${error.message || '请求失败，请检查API密钥或网络连接'}`
+    const aiMsg = currentChat.messages[currentChat.messages.length - 1]
+    if (aiMsg && !aiMsg.isUser) {
+      aiMsg.content = errorMsg
+      
+      // 保存错误消息到数据库
+      try {
+        const messageIndex = currentChat.messages.length - 1
+        await updateMessage(currentChatId.value, messageIndex, {
+          content: errorMsg
+        })
+      } catch (updateError) {
+        console.error('保存错误消息失败:', updateError)
+      }
+    }
+    ElMessage.error(errorMsg)
   }
 }
 
