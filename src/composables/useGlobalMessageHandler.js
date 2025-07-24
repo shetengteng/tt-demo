@@ -128,8 +128,7 @@ export const selectChat = async chatId => {
     (!currentChat.messages || currentChat.messages.length === 0)
   ) {
     try {
-      const messages = await getMessagesForChat(chatId)
-      currentChat.messages = messages
+      currentChat.messages = await getMessagesForChat(chatId)
     } catch (error) {
       console.error('加载会话消息失败:', error)
       ElMessage.error('加载聊天记录失败')
@@ -217,7 +216,7 @@ export const updateChatTitle = async (chatId, message) => {
 }
 
 // 处理模型变更
-export const handleModelChange = async modelId => {
+export const handleModelChange = async () => {
   updateCurrentModel()
   ElMessage.success(`已切换到 ${currentModel.value} 模型`)
 
