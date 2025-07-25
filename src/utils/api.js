@@ -46,7 +46,6 @@ export const sendMessageToAI = async (message, onChunk, signal) => {
     let buffer = ''
 
     // 推理模型的流程状态
-    let reasoningPhaseComplete = false // 思考阶段是否完成
     let contentPhaseStarted = false // 回答阶段是否开始
 
     while (true) {
@@ -122,7 +121,6 @@ export const sendMessageToAI = async (message, onChunk, signal) => {
 
     // 思考过程结束后再发送完成事件
     if (selectedModel === 'deepseek-reasoner') {
-      reasoningPhaseComplete = true
       onChunk({
         type: 'reasoning_complete',
         content: '',

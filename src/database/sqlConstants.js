@@ -1,4 +1,4 @@
-// src/composables/sqlConstants.js
+// src/database/sqlConstants.js
 // SQL语句常量，同时支持ESM和CommonJS导入
 
 const SQL = {
@@ -65,4 +65,4 @@ if (typeof module !== 'undefined' && module.exports) {
 
 // 默认导出，支持ESM
 export { SQL }
-export default { SQL }
+export default { SQL } 

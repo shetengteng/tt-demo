@@ -2,7 +2,7 @@
 import { app, ipcMain } from 'electron'
 import path from 'path'
 import sqlite3 from 'sqlite3'
-import { SQL } from './sqlConstants.js'
+import { SQL } from '../database/sqlConstants.js'
 
 // 启用详细日志
 const sqlite = sqlite3.verbose()
