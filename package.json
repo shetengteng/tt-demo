@@ -20,8 +20,6 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "@fortawesome/free-solid-svg-icons": "^7.0.0",
-    "@fortawesome/vue-fontawesome": "^3.0.8",
     "@vitejs/plugin-vue": "^6.0.0",
     "@vue/shared": "^3.5.17",
     "axios": "^1.6.2",
