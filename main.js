@@ -1,12 +1,12 @@
-import {app} from 'electron'
-import {closeDatabase, initDatabase} from './src/composables/useDb.js'
-import {useGlobalWindow} from './src/composables/useGlobalWindow.js'
+import { app } from 'electron'
+import { closeDatabase, initDatabase } from './src/database/useDb.js'
+import { useGlobalWindow } from './src/composables/useGlobalWindow.js'
 
 // 确保只有一个应用实例
 const gotTheLock = app.requestSingleInstanceLock()
 
 // 获取全局窗口管理器
-const {createWindow, getMainWindow, focusWindow} = useGlobalWindow()
+const { createWindow, getMainWindow, focusWindow } = useGlobalWindow()
 
 if (!gotTheLock) {
   app.quit()
