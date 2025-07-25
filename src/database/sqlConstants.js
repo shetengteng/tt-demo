@@ -57,12 +57,6 @@ const SQL = {
   DELETE_CONFIG: 'DELETE FROM app_configs WHERE key = ?',
 }
 
-// 检查是否在Node.js环境中运行
-if (typeof module !== 'undefined' && module.exports) {
-  // Node.js/CommonJS环境
-  module.exports = { SQL }
-}
-
 // 默认导出，支持ESM
 export { SQL }
 export default { SQL } 

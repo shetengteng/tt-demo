@@ -8,22 +8,15 @@
       </div>
 
       <!-- 聊天图标 - 确保这个是active的状态 -->
-      <div
-          class="sidebar-icon"
-          :class="{ active: currentRoute === '/' || currentRoute === '/chat' }"
-          @click="navigateTo('/chat')"
-      >
+      <div class="sidebar-icon" :class="{ active: currentRoute === '/' || currentRoute === '/chat' }"
+        @click="navigateTo('/chat')">
         <div class="icon-bg">
           <i :class="getIconClass('message')"></i>
         </div>
       </div>
 
       <!-- 知识库图标 -->
-      <div
-          class="sidebar-icon"
-          :class="{ active: currentRoute === '/knowledge' }"
-          @click="navigateTo('/knowledge')"
-      >
+      <div class="sidebar-icon" :class="{ active: currentRoute === '/knowledge' }" @click="navigateTo('/knowledge')">
         <div class="icon-bg">
           <i :class="getIconClass('database')"></i>
         </div>
@@ -50,11 +43,7 @@
       <!--        </div>-->
 
       <!-- 设置图标 -->
-      <div
-          class="sidebar-icon"
-          :class="{ active: currentRoute === '/settings' }"
-          @click="navigateTo('/settings')"
-      >
+      <div class="sidebar-icon" :class="{ active: currentRoute === '/settings' }" @click="navigateTo('/settings')">
         <div class="icon-bg">
           <i :class="getIconClass('cog')"></i>
         </div>
@@ -78,14 +67,14 @@
 </template>
 
 <script setup>
-import {computed} from 'vue'
-import {useGlobalTheme} from '@/composables/useGlobalTheme'
-import {useRouter} from 'vue-router'
-import {useIcon} from '@/composables/useIcon'
+import { computed } from 'vue'
+import { useGlobalTheme } from '@/composables/useGlobalTheme'
+import { useRouter } from 'vue-router'
+import { useIcon } from '@/composables/useIcon'
 
 const router = useRouter()
-const {toggleTheme, currentTheme} = useGlobalTheme()
-const {getIconClass, themeIcon} = useIcon()
+const { toggleTheme } = useGlobalTheme()
+const { getIconClass, themeIcon } = useIcon()
 
 // 获取当前路由
 const currentRoute = computed(() => router.currentRoute.value.path)
@@ -93,12 +82,6 @@ const currentRoute = computed(() => router.currentRoute.value.path)
 // 导航函数
 const navigateTo = path => {
   router.push(path)
-}
-
-// 创建新聊天
-const createNewChat = () => {
-  // 模拟创建新聊天的操作
-  router.push('/chat')
 }
 
 // 处理主题切换
