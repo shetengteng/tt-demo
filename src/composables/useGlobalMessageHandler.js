@@ -10,7 +10,7 @@ import {
   getAllChatSessions,
   getMessagesForChat,
   deleteChatSession,
-} from '@/utils/db'
+} from '@/database/index.js'
 
 // ==================== 全局状态 ====================
 // 所有聊天会话
