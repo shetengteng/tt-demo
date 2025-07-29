@@ -1,1 +1,1 @@
-依据现有的知识库页面，需要添加一个知识库的 表，而documents中需要包含知识库的id，表示从属于该知识库
+获取知识库列表失败: Error: Error invoking remote method 'db:query': Error: SQLITE_ERROR: no such table: knowledge_bases
