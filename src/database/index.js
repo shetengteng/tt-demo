@@ -19,6 +19,29 @@ import {
 } from './configService.js'
 
 import {
+  saveDocument,
+  getAllDocuments,
+  getDocumentById,
+  deleteDocument,
+} from './documentService.js'
+
+import {
+  saveKnowledgeBase,
+  updateKnowledgeBase,
+  getAllKnowledgeBases,
+  getKnowledgeBaseById,
+  deleteKnowledgeBase,
+  getDocumentsByKnowledgeBaseId,
+} from './knowledgeBaseService.js'
+
+import {
+  saveChunk,
+  saveChunks,
+  getChunksByDocId,
+  deleteChunksByDocId,
+} from './chunkService.js'
+
+import {
   initDb,
 } from './initService.js'
 
@@ -35,4 +58,18 @@ export {
   getConfig,
   getAllConfigs,
   deleteConfig,
+  saveDocument,
+  getAllDocuments,
+  getDocumentById,
+  deleteDocument,
+  saveKnowledgeBase,
+  updateKnowledgeBase,
+  getAllKnowledgeBases,
+  getKnowledgeBaseById,
+  deleteKnowledgeBase,
+  getDocumentsByKnowledgeBaseId,
+  saveChunk,
+  saveChunks,
+  getChunksByDocId,
+  deleteChunksByDocId,
 } 

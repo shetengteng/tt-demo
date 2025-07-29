@@ -56,6 +56,9 @@ const initDatabase = () => {
                 SQL.CREATE_CHAT_SESSIONS_TABLE,
                 SQL.CREATE_MESSAGES_TABLE,
                 SQL.CREATE_CONFIGS_TABLE,
+                SQL.CREATE_KNOWLEDGE_BASES_TABLE,
+                SQL.CREATE_DOCUMENTS_TABLE,
+                SQL.CREATE_CHUNKS_TABLE,
             ]
 
             for (const tableSql of tables) {
