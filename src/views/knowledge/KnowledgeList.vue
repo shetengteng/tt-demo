@@ -17,7 +17,7 @@
 
       <el-menu v-else :default-active="selectedKnowledgeBase" @select="handleKnowledgeBaseSelect">
         <KnowledgeItem v-for="kb in knowledgeBases" :key="kb.id" :knowledge-base="kb"
-          @knowledge-action="handleKnowledgeAction" />
+          @knowledge-action="handleKnowledgeAction" @update-knowledge-base="handleUpdateKnowledgeBase" />
       </el-menu>
     </div>
   </div>
@@ -123,6 +123,11 @@ const handleKnowledgeBaseSelect = index => {
 
 const handleKnowledgeAction = command => {
   emit('knowledge-action', command)
+}
+
+const handleUpdateKnowledgeBase = async () => {
+  // 重新加载知识库列表
+  await loadKnowledgeBases()
 }
 
 // 格式化日期

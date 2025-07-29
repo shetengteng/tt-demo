@@ -32,12 +32,17 @@
 </template>
 
 <script setup>
+import { ElMessage, ElMessageBox } from 'element-plus'
 import { useIcon } from '@/composables/useIcon'
+import {
+  updateKnowledgeBase,
+  deleteKnowledgeBase as deleteKnowledgeBaseFromDb,
+} from '@/database'
 
 const { getIconClass } = useIcon()
 
 // Props
-defineProps({
+const props = defineProps({
   knowledgeBase: {
     type: Object,
     required: true,
@@ -45,11 +50,69 @@ defineProps({
 })
 
 // Emits
-const emit = defineEmits(['knowledge-action'])
+const emit = defineEmits(['knowledge-action', 'update-knowledge-base'])
 
 // 方法
-const handleKnowledgeAction = command => {
-  emit('knowledge-action', command)
+const handleKnowledgeAction = async command => {
+  const [action, id] = command.split('-')
+
+  if (action === 'edit') {
+    await editKnowledgeBase(id)
+  } else if (action === 'delete') {
+    await deleteKnowledgeBaseHandler(id)
+  }
+}
+
+const editKnowledgeBase = async (id) => {
+  try {
+    const { value: form } = await ElMessageBox.prompt('请输入新的知识库名称', '编辑知识库', {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      inputPattern: /\S+/,
+      inputErrorMessage: '知识库名称不能为空',
+      inputValue: props.knowledgeBase.name,
+    })
+
+    if (form) {
+      const success = await updateKnowledgeBase(parseInt(id), {
+        name: form,
+        description: props.knowledgeBase.description,
+      })
+
+      if (success) {
+        ElMessage.success('知识库更新成功')
+        // 通知父组件更新知识库
+        emit('update-knowledge-base')
+      }
+    }
+  } catch (error) {
+    if (error !== 'cancel') {
+      console.error('更新知识库失败:', error)
+      ElMessage.error('更新知识库失败')
+    }
+  }
+}
+
+const deleteKnowledgeBaseHandler = async (id) => {
+  try {
+    await ElMessageBox.confirm('确定要删除这个知识库吗？删除后无法恢复。', '删除知识库', {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'warning',
+    })
+
+    const success = await deleteKnowledgeBaseFromDb(parseInt(id))
+    if (success) {
+      ElMessage.success('知识库删除成功')
+      // 通知父组件更新知识库列表
+      emit('update-knowledge-base')
+    }
+  } catch (error) {
+    if (error !== 'cancel') {
+      console.error('删除知识库失败:', error)
+      ElMessage.error('删除知识库失败')
+    }
+  }
 }
 </script>
 

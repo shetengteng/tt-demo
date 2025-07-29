@@ -22,15 +22,12 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { useIcon } from '@/composables/useIcon'
 import KnowledgeList from './KnowledgeList.vue'
 import KnowledgeContent from './KnowledgeContent.vue'
 import {
-  getAllKnowledgeBases,
-  updateKnowledgeBase,
-  deleteKnowledgeBase as deleteKnowledgeBaseFromDb,
   getDocumentsByKnowledgeBaseId,
 } from '@/database'
 
@@ -77,82 +74,18 @@ const loadDocuments = async (knowledgeBaseId) => {
 }
 
 
-
 const handleKnowledgeBaseSelect = async (id) => {
   selectedKnowledgeBase.value = id
   await loadDocuments(id)
 }
 
 
-
 const handleKnowledgeAction = async (command) => {
-  const [action, id] = command.split('-')
-
-  if (action === 'edit') {
-    await editKnowledgeBase(id)
-  } else if (action === 'delete') {
-    await deleteKnowledgeBaseHandler(id)
-  }
+  // 编辑和删除逻辑已移到 KnowledgeItem.vue 中
+  console.log('Knowledge action:', command)
 }
 
-const editKnowledgeBase = async (id) => {
-  try {
-    const knowledgeBase = knowledgeBases.value.find(kb => kb.id === id)
-    if (!knowledgeBase) return
 
-    const { value: form } = await ElMessageBox.prompt('请输入新的知识库名称', '编辑知识库', {
-      confirmButtonText: '确定',
-      cancelButtonText: '取消',
-      inputPattern: /\S+/,
-      inputErrorMessage: '知识库名称不能为空',
-      inputValue: knowledgeBase.name,
-    })
-
-    if (form) {
-      const success = await updateKnowledgeBase(parseInt(id), {
-        name: form,
-        description: knowledgeBase.description,
-      })
-
-      if (success) {
-        ElMessage.success('知识库更新成功')
-        await loadKnowledgeBases()
-      }
-    }
-  } catch (error) {
-    if (error !== 'cancel') {
-      console.error('更新知识库失败:', error)
-      ElMessage.error('更新知识库失败')
-    }
-  }
-}
-
-const deleteKnowledgeBaseHandler = async (id) => {
-  try {
-    await ElMessageBox.confirm('确定要删除这个知识库吗？删除后无法恢复。', '删除知识库', {
-      confirmButtonText: '确定',
-      cancelButtonText: '取消',
-      type: 'warning',
-    })
-
-    const success = await deleteKnowledgeBaseFromDb(parseInt(id))
-    if (success) {
-      ElMessage.success('知识库删除成功')
-      await loadKnowledgeBases()
-
-      // 如果删除的是当前选中的知识库，清空选择
-      if (selectedKnowledgeBase.value === id) {
-        selectedKnowledgeBase.value = ''
-        filteredFiles.value = []
-      }
-    }
-  } catch (error) {
-    if (error !== 'cancel') {
-      console.error('删除知识库失败:', error)
-      ElMessage.error('删除知识库失败')
-    }
-  }
-}
 
 const handleFileChange = file => {
   console.log('文件变化:', file)
@@ -214,7 +147,6 @@ const getFileIcon = type => {
   }
   return iconMap[type] || 'ri-file-line'
 }
-
 
 
 // 根据文件路径获取文件类型
