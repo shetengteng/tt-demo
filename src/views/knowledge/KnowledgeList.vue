@@ -17,128 +17,34 @@
 
       <el-menu v-else :default-active="selectedKnowledgeBase" @select="handleKnowledgeBaseSelect">
         <KnowledgeItem v-for="kb in knowledgeBases" :key="kb.id" :knowledge-base="kb"
-          @knowledge-action="handleKnowledgeAction" @update-knowledge-base="handleUpdateKnowledgeBase" />
+          @knowledge-action="handleKnowledgeAction" />
       </el-menu>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
-import { ElMessage, ElMessageBox } from 'element-plus'
+import { onMounted } from 'vue'
 import { useIcon } from '@/composables/useIcon'
+import { useGlobalKnowledge } from '@/composables/useGlobalKnowledge'
 import KnowledgeItem from './KnowledgeItem.vue'
-import {
-  getAllKnowledgeBases,
-  saveKnowledgeBase,
-  updateKnowledgeBase,
-  deleteKnowledgeBase as deleteKnowledgeBaseFromDb,
-} from '@/database'
 
 const { getIconClass } = useIcon()
 
-// Props
-const props = defineProps({
-  knowledgeBases: {
-    type: Array,
-    default: () => [],
-  },
-  selectedKnowledgeBase: {
-    type: String,
-    default: '',
-  },
-})
-
-// Emits
-const emit = defineEmits([
-  'update-knowledge-bases',
-  'select-knowledge-base',
-  'knowledge-action',
-])
-
-// 响应式数据
-const loading = ref(false)
+// 使用全局知识库状态管理
+const {
+  knowledgeBases,
+  selectedKnowledgeBase,
+  loading,
+  loadKnowledgeBases,
+  createKnowledgeBase,
+  selectKnowledgeBase,
+  handleKnowledgeAction,
+} = useGlobalKnowledge()
 
 // 方法
-const loadKnowledgeBases = async () => {
-  try {
-    loading.value = true
-    const dbKnowledgeBases = await getAllKnowledgeBases()
-    const formattedKnowledgeBases = dbKnowledgeBases.map(kb => ({
-      id: kb.id.toString(),
-      name: kb.name,
-      description: kb.description,
-      fileCount: 0, // 暂时设为0，后续可以计算
-      lastUpdated: formatDate(kb.updatedAt),
-    }))
-
-    // 通知父组件更新知识库列表
-    emit('update-knowledge-bases', formattedKnowledgeBases)
-
-    // 如果有知识库，默认选中第一个
-    if (formattedKnowledgeBases.length > 0 && !props.selectedKnowledgeBase) {
-      emit('select-knowledge-base', formattedKnowledgeBases[0].id)
-    }
-  } catch (error) {
-    console.error('加载知识库失败:', error)
-  } finally {
-    loading.value = false
-  }
-}
-
-const createKnowledgeBase = async () => {
-  try {
-    // 显示创建知识库对话框
-    const { value: form } = await ElMessageBox.prompt('请输入知识库名称', '创建知识库', {
-      confirmButtonText: '确定',
-      cancelButtonText: '取消',
-      inputPattern: /\S+/,
-      inputErrorMessage: '知识库名称不能为空',
-      inputPlaceholder: '请输入知识库名称',
-    })
-
-    if (form) {
-      const id = await saveKnowledgeBase({
-        name: form,
-        description: '',
-      })
-
-      if (id) {
-        ElMessage.success('知识库创建成功')
-        // 重新加载知识库列表
-        await loadKnowledgeBases()
-      }
-    }
-  } catch (error) {
-    if (error !== 'cancel') {
-      console.error('创建知识库失败:', error)
-      ElMessage.error('创建知识库失败')
-    }
-  }
-}
-
-const handleKnowledgeBaseSelect = index => {
-  emit('select-knowledge-base', index)
-}
-
-const handleKnowledgeAction = command => {
-  emit('knowledge-action', command)
-}
-
-const handleUpdateKnowledgeBase = async () => {
-  // 重新加载知识库列表
-  await loadKnowledgeBases()
-}
-
-// 格式化日期
-const formatDate = (dateString) => {
-  if (!dateString) return '未知'
-  try {
-    const date = new Date(dateString)
-    return date.toLocaleDateString('zh-CN')
-  } catch (error) {
-    return '未知'
-  }
+const handleKnowledgeBaseSelect = async (id) => {
+  await selectKnowledgeBase(id)
 }
 
 // 生命周期

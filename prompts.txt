@@ -1,1 +1,1 @@
-获取知识库列表失败: Error: Error invoking remote method 'db:query': Error: SQLITE_ERROR: no such table: knowledge_bases
+继续排查

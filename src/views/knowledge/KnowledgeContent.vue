@@ -96,70 +96,35 @@
 <script setup>
 import { ref, computed } from 'vue'
 import { useIcon } from '@/composables/useIcon'
+import { useGlobalKnowledge } from '@/composables/useGlobalKnowledge'
 
 const { getIconClass } = useIcon()
 
-// Props
-const props = defineProps({
-  currentKnowledgeBase: {
-    type: Object,
-    default: null,
-  },
-  fileList: {
-    type: Array,
-    default: () => [],
-  },
-  searchKeyword: {
-    type: String,
-    default: '',
-  },
-  filteredFiles: {
-    type: Array,
-    default: () => [],
-  },
-  selectedFile: {
-    type: String,
-    default: '',
-  },
-})
-
-// Emits
-const emit = defineEmits([
-  'create-knowledge-base',
-  'file-change',
-  'search',
-  'refresh-file-list',
-  'show-upload-dialog',
-  'file-select',
-  'file-action',
-])
+// 使用全局知识库状态管理
+const {
+  currentKnowledgeBase,
+  fileList,
+  searchKeyword,
+  filteredFiles,
+  selectedFile,
+  searchFiles,
+  refreshFileList,
+  selectFile,
+  handleFileAction,
+  handleFileChange,
+  showUploadDialog,
+} = useGlobalKnowledge()
 
 // 本地搜索关键词
 const localSearchKeyword = ref('')
 
 // 方法
-const handleFileChange = file => {
-  emit('file-change', file)
-}
-
 const handleSearch = () => {
-  emit('search', localSearchKeyword.value)
-}
-
-const refreshFileList = () => {
-  emit('refresh-file-list')
-}
-
-const showUploadDialog = () => {
-  emit('show-upload-dialog')
+  searchFiles(localSearchKeyword.value)
 }
 
 const handleFileSelect = index => {
-  emit('file-select', index)
-}
-
-const handleFileAction = command => {
-  emit('file-action', command)
+  selectFile(index)
 }
 
 const getFileIcon = type => {
