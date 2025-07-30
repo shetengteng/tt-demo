@@ -102,6 +102,22 @@
     await updateActiveKnowledgeBaseName()
   })
   
+  // 监听当前会话ID变化，当切换会话时更新知识库信息
+  watch(currentChatId, async (newChatId) => {
+    if (newChatId) {
+      const currentChat = chatSessions.value.find(chat => chat.id === newChatId)
+      if (currentChat) {
+        // 更新知识库选择
+        selectedKnowledgeBase.value = currentChat.knowledgeBaseId || null
+        await updateActiveKnowledgeBaseName()
+      } else {
+        // 重置知识库选择
+        selectedKnowledgeBase.value = null
+        activeKnowledgeBaseName.value = ''
+      }
+    }
+  })
+  
   // 更新当前显示的知识库名称
   const updateActiveKnowledgeBaseName = async () => {
     if (!selectedKnowledgeBase.value) {
