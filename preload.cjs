@@ -19,4 +19,11 @@ contextBridge.exposeInMainWorld('electronAPI', {
   path: {
     join: (...args) => ipcRenderer.invoke('path:join', ...args),
   },
+
+  // 提供IPC通信功能
+  ipc: {
+    invoke: (channel, ...args) => ipcRenderer.invoke(channel, ...args),
+    on: (channel, listener) => ipcRenderer.on(channel, listener),
+    off: (channel, listener) => ipcRenderer.off(channel, listener),
+  },
 })

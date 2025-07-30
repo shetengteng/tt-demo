@@ -1,6 +1,8 @@
 // src/database/useDb.js - 数据库操作封装模块
 import { app, ipcMain } from 'electron'
 import path from 'path'
+import fs from 'fs/promises'
+import os from 'os'
 import sqlite3 from 'sqlite3'
 import { SQL } from './sqlConstants.js'
 
@@ -105,6 +107,58 @@ const initDatabase = () => {
     // 路径连接操作
     ipcMain.handle('path:join', (event, ...args) => {
         return path.join(...args)
+    })
+
+    // 保存临时文件
+    ipcMain.handle('save-temp-file', async (event, { fileName, content }) => {
+        try {
+            const tempDir = path.join(os.tmpdir(), 'tt-demo-uploads')
+
+            // 确保临时目录存在
+            await fs.mkdir(tempDir, { recursive: true })
+
+            // 生成唯一的临时文件名
+            const timestamp = Date.now()
+            const ext = path.extname(fileName)
+            const baseName = path.basename(fileName, ext)
+            const tempFileName = `${baseName}_${timestamp}${ext}`
+            const tempPath = path.join(tempDir, tempFileName)
+
+            // 将内容写入临时文件
+            const buffer = Buffer.from(content)
+            await fs.writeFile(tempPath, buffer)
+
+            console.log('临时文件已保存:', tempPath)
+            return tempPath
+        } catch (error) {
+            console.error('保存临时文件失败:', error)
+            throw new Error(`保存临时文件失败: ${error.message}`)
+        }
+    })
+
+    // 清理临时文件
+    ipcMain.handle('cleanup-temp-file', async (event, filePath) => {
+        try {
+            await fs.unlink(filePath)
+            console.log('临时文件已清理:', filePath)
+            return true
+        } catch (error) {
+            console.warn('清理临时文件失败:', error)
+            return false
+        }
+    })
+
+    // 文件解析处理
+    ipcMain.handle('parse-file', async (event, filePath) => {
+        try {
+            // 动态导入主进程文件解析服务
+            const { fileParserServiceMain } = await import(path.join(process.cwd(), 'src/services/fileParserService.main.js'))
+            const result = await fileParserServiceMain.parseFile(filePath)
+            return { success: true, data: result }
+        } catch (error) {
+            console.error('文件解析失败:', error)
+            return { success: false, error: error.message }
+        }
     })
 }
 

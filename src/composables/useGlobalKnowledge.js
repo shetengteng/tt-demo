@@ -7,6 +7,7 @@ import {
     saveKnowledgeBase,
     updateKnowledgeBase,
 } from '@/database'
+import { fileProcessingService, searchService } from '@/services'
 
 /**
  * 全局知识库状态管理
@@ -22,6 +23,20 @@ const searchKeyword = ref('')
 const filteredFiles = ref([])
 const selectedFile = ref('')
 
+// 文件上传相关状态
+const uploading = ref(false)
+const uploadProgress = ref(0)
+const uploadStatus = ref('')
+const uploadErrors = ref([])
+const processingFiles = ref([])
+
+// 搜索相关状态
+const searching = ref(false)
+const searchResults = ref([])
+const searchQuery = ref('')
+const searchType = ref('hybrid') // 'semantic', 'keyword', 'hybrid'
+const showSearchResults = ref(false)
+
 // 计算属性
 const currentKnowledgeBase = computed(() =>
     knowledgeBases.value.find(kb => kb.id === selectedKnowledgeBase.value)
@@ -36,6 +51,15 @@ const formatDate = (dateString) => {
     } catch (error) {
         return '未知'
     }
+}
+
+// 格式化文件大小
+const formatFileSize = (bytes) => {
+    if (!bytes || bytes === 0) return '0 B'
+    const k = 1024
+    const sizes = ['B', 'KB', 'MB', 'GB']
+    const i = Math.floor(Math.log(bytes) / Math.log(k))
+    return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + ' ' + sizes[i]
 }
 
 // 根据文件路径获取文件类型
@@ -164,30 +188,121 @@ const loadDocuments = async (knowledgeBaseId) => {
 
     try {
         const documents = await getDocumentsByKnowledgeBaseId(parseInt(knowledgeBaseId))
-        filteredFiles.value = documents.map(doc => ({
-            id: doc.id.toString(),
-            name: doc.title,
-            type: getFileType(doc.filePath),
-            size: '未知', // 暂时设为未知，后续可以从文件获取
-            uploadTime: formatDate(doc.createdAt),
-        }))
+        filteredFiles.value = documents.map(doc => {
+            // 解析metadata获取文件大小等信息
+            let metadata = {}
+            try {
+                metadata = doc.metadata ? JSON.parse(doc.metadata) : {}
+            } catch (e) {
+                console.warn('解析文档metadata失败:', e)
+            }
+
+            return {
+                id: doc.id.toString(),
+                name: doc.title,
+                type: getFileType(doc.file_path || doc.filePath),
+                size: metadata.fileSize ? formatFileSize(metadata.fileSize) : '未知',
+                uploadTime: formatDate(doc.created_at || doc.createdAt),
+                chunkCount: metadata.chunkCount || 0,
+                fileType: metadata.fileType || 'unknown',
+            }
+        })
     } catch (error) {
         console.error('加载文档失败:', error)
         filteredFiles.value = []
     }
 }
 
-// 搜索文件
+// 搜索文件（简单文件名搜索）
 const searchFiles = (keyword) => {
     searchKeyword.value = keyword
     if (!keyword.trim()) {
         loadDocuments(selectedKnowledgeBase.value)
+        showSearchResults.value = false
     } else {
         // 过滤文件列表
         const documents = filteredFiles.value.filter(file =>
             file.name.toLowerCase().includes(keyword.toLowerCase())
         )
         filteredFiles.value = documents
+    }
+}
+
+// 语义搜索
+const performSemanticSearch = async (query) => {
+    if (!selectedKnowledgeBase.value) {
+        ElMessage.warning('请先选择一个知识库')
+        return
+    }
+
+    if (!query.trim()) {
+        showSearchResults.value = false
+        return
+    }
+
+    try {
+        searching.value = true
+        searchQuery.value = query
+
+        let results
+        switch (searchType.value) {
+            case 'semantic':
+                results = await searchService.searchInKnowledgeBase(
+                    query,
+                    selectedKnowledgeBase.value,
+                    { limit: 20, similarityThreshold: 0.3 }
+                )
+                break
+            case 'keyword':
+                results = await searchService.keywordSearch(
+                    query,
+                    selectedKnowledgeBase.value,
+                    { limit: 20 }
+                )
+                break
+            case 'hybrid':
+            default:
+                results = await searchService.hybridSearch(
+                    query,
+                    selectedKnowledgeBase.value,
+                    { limit: 20, keywordWeight: 0.3, semanticWeight: 0.7 }
+                )
+                break
+        }
+
+        searchResults.value = results.results || []
+        showSearchResults.value = true
+
+        if (searchResults.value.length === 0) {
+            ElMessage.info('未找到相关内容')
+        } else {
+            ElMessage.success(`找到 ${searchResults.value.length} 个相关结果`)
+        }
+
+    } catch (error) {
+        console.error('搜索失败:', error)
+        ElMessage.error(`搜索失败: ${error.message}`)
+        searchResults.value = []
+        showSearchResults.value = false
+    } finally {
+        searching.value = false
+    }
+}
+
+// 清除搜索结果
+const clearSearchResults = () => {
+    searchResults.value = []
+    searchQuery.value = ''
+    showSearchResults.value = false
+    searchKeyword.value = ''
+    loadDocuments(selectedKnowledgeBase.value)
+}
+
+// 设置搜索类型
+const setSearchType = (type) => {
+    searchType.value = type
+    if (searchQuery.value.trim()) {
+        performSemanticSearch(searchQuery.value)
     }
 }
 
@@ -229,16 +344,100 @@ const handleFileAction = (command) => {
     }
 }
 
-// 处理文件变化
-const handleFileChange = (file) => {
-    console.log('文件变化:', file)
-    // TODO: 实现文件上传逻辑
+// 处理文件变化（拖拽上传）
+const handleFileChange = async (file, fileList) => {
+    if (!selectedKnowledgeBase.value) {
+        ElMessage.warning('请先选择一个知识库')
+        return
+    }
+
+    // 获取当前选中的文件列表
+    const currentFiles = fileList || [file]
+
+    try {
+        uploading.value = true
+        uploadProgress.value = 0
+        uploadStatus.value = '准备上传...'
+        uploadErrors.value = []
+        processingFiles.value = []
+
+        // 处理文件上传
+        const result = await fileProcessingService.processUploadedFiles(
+            currentFiles.map(f => f.raw || f), // 处理Element Plus的文件对象
+            parseInt(selectedKnowledgeBase.value),
+            {
+                onProgress: (progress) => {
+                    uploadProgress.value = progress.progress
+                    uploadStatus.value = progress.message || '处理中...'
+                },
+                onFileProgress: (fileProgress) => {
+                    // 更新单个文件的处理状态
+                    const existingIndex = processingFiles.value.findIndex(
+                        f => f.fileName === fileProgress.fileName
+                    )
+                    if (existingIndex >= 0) {
+                        processingFiles.value[existingIndex] = {
+                            ...processingFiles.value[existingIndex],
+                            ...fileProgress
+                        }
+                    } else {
+                        processingFiles.value.push({
+                            fileName: fileProgress.fileName,
+                            ...fileProgress
+                        })
+                    }
+                }
+            }
+        )
+
+        // 处理结果
+        if (result.summary.success > 0) {
+            ElMessage.success(`成功处理 ${result.summary.success} 个文件`)
+
+            // 如果有错误，显示警告
+            if (result.errors.length > 0) {
+                uploadErrors.value = result.errors
+                ElMessage.warning(`${result.errors.length} 个文件处理失败`)
+            }
+
+            // 刷新文件列表
+            await refreshFileList()
+        } else {
+            throw new Error('所有文件处理失败')
+        }
+
+    } catch (error) {
+        console.error('文件上传失败:', error)
+        ElMessage.error(`文件上传失败: ${error.message}`)
+        uploadErrors.value = [{ error: error.message }]
+    } finally {
+        uploading.value = false
+        uploadStatus.value = ''
+        processingFiles.value = []
+    }
 }
 
 // 显示上传对话框
 const showUploadDialog = () => {
-    // TODO: 实现显示上传对话框逻辑
-    console.log('显示上传对话框')
+    if (!selectedKnowledgeBase.value) {
+        ElMessage.warning('请先选择一个知识库')
+        return
+    }
+
+    // 触发文件选择器
+    const input = document.createElement('input')
+    input.type = 'file'
+    input.multiple = true
+    input.accept = '.txt,.md,.json,.js,.ts,.vue,.css,.html'
+
+    input.onchange = async (event) => {
+        const files = Array.from(event.target.files)
+        if (files.length > 0) {
+            await handleFileChange(null, files)
+        }
+    }
+
+    input.click()
 }
 
 // 创建全局状态对象
@@ -252,6 +451,20 @@ const globalKnowledgeState = {
     searchKeyword,
     filteredFiles,
     selectedFile,
+
+    // 文件上传状态
+    uploading,
+    uploadProgress,
+    uploadStatus,
+    uploadErrors,
+    processingFiles,
+
+    // 搜索状态
+    searching,
+    searchResults,
+    searchQuery,
+    searchType,
+    showSearchResults,
 
     // 方法
     loadKnowledgeBases,
@@ -267,6 +480,11 @@ const globalKnowledgeState = {
     handleFileAction,
     handleFileChange,
     showUploadDialog,
+
+    // 搜索方法
+    performSemanticSearch,
+    clearSearchResults,
+    setSearchType,
 }
 
 export function useGlobalKnowledge() {
