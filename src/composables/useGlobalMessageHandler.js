@@ -102,6 +102,8 @@ export const createNewChat = async () => {
     messages: [],
     createdAt: Date.now(),
     lastUpdated: Date.now(),
+    knowledgeBaseId: null,    // 初始化知识库ID为null
+    knowledgeBaseName: null   // 初始化知识库名称为null
   }
 
   chatSessions.value.unshift(newChat) // 添加到列表开头
@@ -288,6 +290,13 @@ export const handleSendMessage = async message => {
     if (isMessageObject && !message.isUser) {
       // 是已经构建好的AI消息对象（如知识库搜索结果）
       currentChat.messages.push(message)
+
+      // 如果消息包含知识库信息，保存到会话中
+      if (message.knowledgeBaseId) {
+        currentChat.knowledgeBaseId = message.knowledgeBaseId
+        currentChat.knowledgeBaseName = message.knowledgeBaseName || null
+      }
+
       currentChat.lastUpdated = Date.now()
       await saveMessage(currentChatId.value, message)
       await saveChatSession(currentChat)

@@ -13,7 +13,14 @@ async function saveChatSession(chat) {
 
     await electronAPI.db.run(
       SQL.INSERT_OR_REPLACE_CHAT_SESSION,
-      [chat.id, chat.title, chat.createdAt, chat.lastUpdated]
+      [
+        chat.id,
+        chat.title,
+        chat.createdAt,
+        chat.lastUpdated,
+        chat.knowledgeBaseId || null,
+        chat.knowledgeBaseName || null
+      ]
     )
     return true
   } catch (error) {
@@ -33,6 +40,8 @@ async function getAllChatSessions() {
       title: row.title,
       createdAt: row.created_at,
       lastUpdated: row.last_updated,
+      knowledgeBaseId: row.knowledge_base_id || null,
+      knowledgeBaseName: row.knowledge_base_name || null,
       messages: [], // 暂时为空，后面会加载
     }))
   } catch (error) {

@@ -8,6 +8,11 @@
     <!-- 中间内容 -->
     <div class="chat-content">
       <div class="chat-title">{{ chat.title || '新的聊天' }}</div>
+      <!-- 添加知识库信息显示 -->
+      <div class="chat-kb-info" v-if="chat.knowledgeBaseName">
+        <i :class="getIconClass('database')" class="kb-icon"></i>
+        <span>{{ chat.knowledgeBaseName }}</span>
+      </div>
     </div>
 
     <!-- 右侧菜单 -->
@@ -203,6 +208,23 @@ const getIconStyle = (chat) => {
   overflow: hidden;
   text-overflow: ellipsis;
   color: var(--primary-text-color, #333);
+}
+
+/* 知识库信息样式 */
+.chat-kb-info {
+  font-size: 12px;
+  color: var(--secondary-text-color, #666);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-top: 2px;
+}
+
+.kb-icon {
+  font-size: 12px;
 }
 
 .chat-actions {

@@ -7,7 +7,9 @@ const SQL = {
       id TEXT PRIMARY KEY,
       title TEXT NOT NULL,
       created_at INTEGER NOT NULL,
-      last_updated INTEGER NOT NULL
+      last_updated INTEGER NOT NULL,
+      knowledge_base_id INTEGER,
+      knowledge_base_name TEXT
     )
   `,
   CREATE_MESSAGES_TABLE: `
@@ -99,8 +101,8 @@ const SQL = {
     VALUES (?, ?, ?, ?)
   `,
   INSERT_OR_REPLACE_CHAT_SESSION: `
-    INSERT OR REPLACE INTO chat_sessions (id, title, created_at, last_updated) 
-    VALUES (?, ?, ?, ?)
+    INSERT OR REPLACE INTO chat_sessions (id, title, created_at, last_updated, knowledge_base_id, knowledge_base_name) 
+    VALUES (?, ?, ?, ?, ?, ?)
   `,
   UPSERT_CONFIG: `
     INSERT OR REPLACE INTO app_configs (key, value, updated_at)

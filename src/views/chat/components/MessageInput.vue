@@ -9,34 +9,37 @@
       ></el-input>
     </div>
     <div class="action-row">
-      <el-select
-        v-model="selectedModel"
-        placeholder="选择模型"
-        class="model-selector"
-        @change="changeModel"
-      >
-        <el-option
-          v-for="model in availableModels"
-          :key="model.value"
-          :label="model.label"
-          :value="model.value"
-        />
-      </el-select>
-      
-      <!-- 添加知识库选择 -->
-      <el-select
-        v-model="selectedKnowledgeBase"
-        placeholder="选择知识库(可选)"
-        class="kb-selector"
-        clearable
-      >
-        <el-option
-          v-for="kb in knowledgeBases"
-          :key="kb.id"
-          :label="kb.name"
-          :value="kb.id"
-        />
-      </el-select>
+      <!-- 将模型选择和知识库选择放置在一起并居中 -->
+      <div class="selector-container">
+        <el-select
+          v-model="selectedModel"
+          placeholder="选择模型"
+          class="model-selector"
+          @change="changeModel"
+        >
+          <el-option
+            v-for="model in availableModels"
+            :key="model.value"
+            :label="model.label"
+            :value="model.value"
+          />
+        </el-select>
+        
+        <el-select
+          v-model="selectedKnowledgeBase"
+          placeholder="选择知识库(可选)"
+          class="kb-selector"
+          clearable
+          @change="changeKnowledgeBase"
+        >
+          <el-option
+            v-for="kb in knowledgeBases"
+            :key="kb.id"
+            :label="kb.name"
+            :value="kb.id"
+          />
+        </el-select>
+      </div>
 
       <div class="button-group">
         <el-button type="primary" class="send-btn" @click="sendMessage" :loading="isLoading">
@@ -45,24 +48,31 @@
         </el-button>
       </div>
     </div>
+    <!-- 显示当前使用的知识库 -->
+    <div class="current-info" v-if="activeKnowledgeBaseName">
+      <span>正在使用知识库: {{ activeKnowledgeBaseName }}</span>
+    </div>
   </div>
 </template>
 
 <script setup>
-  import { ref, onMounted } from 'vue'
+  import { ref, onMounted, watch } from 'vue'
   import { availableModels } from '@/utils/api.js'
   import { useIcon } from '@/composables/useIcon.js'
   import { knowledgeSearchService } from '@/services'
-  import { getAllKnowledgeBases } from '@/database'
+  import { getAllKnowledgeBases, getKnowledgeBaseById } from '@/database'
   import { ElMessage } from 'element-plus'
+  import { useGlobalMessageHandler } from '@/composables/useGlobalMessageHandler'
 
   const { getIconClass } = useIcon()
   const inputMessage = ref('')
   const selectedModel = ref('')
   const selectedKnowledgeBase = ref(null)
+  const activeKnowledgeBaseName = ref('')
   const knowledgeBases = ref([])
   const isLoading = ref(false)
   const emit = defineEmits(['send-message', 'change-model', 'update-message'])
+  const { currentChatId, chatSessions, saveChatSession } = useGlobalMessageHandler()
 
   // 初始化时获取当前选择的模型和加载知识库
   onMounted(async () => {
@@ -73,10 +83,66 @@
     // 加载知识库列表
     try {
       knowledgeBases.value = await getAllKnowledgeBases()
+      
+      // 如果当前会话已有关联知识库，加载它
+      if (currentChatId.value) {
+        const currentChat = chatSessions.value.find(chat => chat.id === currentChatId.value)
+        if (currentChat && currentChat.knowledgeBaseId) {
+          selectedKnowledgeBase.value = currentChat.knowledgeBaseId
+          await updateActiveKnowledgeBaseName()
+        }
+      }
     } catch (error) {
       console.error('加载知识库列表失败:', error)
     }
   })
+  
+  // 监听知识库变化
+  watch(selectedKnowledgeBase, async () => {
+    await updateActiveKnowledgeBaseName()
+  })
+  
+  // 更新当前显示的知识库名称
+  const updateActiveKnowledgeBaseName = async () => {
+    if (!selectedKnowledgeBase.value) {
+      activeKnowledgeBaseName.value = ''
+      return
+    }
+    
+    try {
+      const kb = await getKnowledgeBaseById(selectedKnowledgeBase.value)
+      if (kb) {
+        activeKnowledgeBaseName.value = kb.name
+      } else {
+        // 知识库不存在，清空选择
+        selectedKnowledgeBase.value = null
+        activeKnowledgeBaseName.value = ''
+        ElMessage.warning('选择的知识库不存在或已被删除')
+      }
+    } catch (error) {
+      console.error('获取知识库信息失败:', error)
+      activeKnowledgeBaseName.value = ''
+    }
+  }
+  
+  // 知识库选择变更
+  const changeKnowledgeBase = async () => {
+    if (currentChatId.value) {
+      const currentChat = chatSessions.value.find(chat => chat.id === currentChatId.value)
+      if (currentChat) {
+        // 保存知识库选择到当前会话
+        currentChat.knowledgeBaseId = selectedKnowledgeBase.value
+        currentChat.lastUpdated = Date.now()
+        await saveChatSession(currentChat)
+        
+        if (selectedKnowledgeBase.value) {
+          ElMessage.success(`已切换到知识库: ${activeKnowledgeBaseName.value}`)
+        } else {
+          ElMessage.info('已取消知识库选择')
+        }
+      }
+    }
+  }
 
   const sendMessage = async () => {
     if (!inputMessage.value.trim()) return
@@ -122,7 +188,8 @@
       content: '',
       isUser: false,
       isKnowledgeBase: true,
-      knowledgeBaseId: selectedKnowledgeBase.value
+      knowledgeBaseId: selectedKnowledgeBase.value,
+      knowledgeBaseName: activeKnowledgeBaseName.value // 添加知识库名称
     }
     
     // 提交AI消息（空内容，后续会填充）
@@ -176,6 +243,14 @@
     align-items: center;
     margin-bottom: 12px;
   }
+  
+  /* 模型和知识库选择器容器 */
+  .selector-container {
+    display: flex;
+    gap: 12px;
+    margin: 0 auto;
+    justify-content: center;
+  }
 
   .model-selector, .kb-selector {
     width: 160px;
@@ -209,6 +284,14 @@
 
   .send-btn i {
     font-size: 18px;
+  }
+  
+  /* 当前知识库信息显示 */
+  .current-info {
+    margin-top: 8px;
+    text-align: center;
+    color: var(--secondary-text-color, #666);
+    font-size: 12px;
   }
 
   /* Element UI 主题适配 */
