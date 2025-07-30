@@ -2,6 +2,7 @@ import { ref, reactive, computed } from 'vue'
 import { sendMessageToAI, availableModels } from '@/utils/api'
 import { ElMessage } from 'element-plus'
 import { v4 as uuidv4 } from 'uuid'
+import { knowledgeSearchService } from '@/services'
 import {
   initDb,
   saveChatSession,
@@ -11,6 +12,9 @@ import {
   getMessagesForChat,
   deleteChatSession,
 } from '@/database/index.js'
+
+// 导出数据库操作函数，使它们可以被 useGlobalMessageHandler 直接访问
+export { saveChatSession, saveMessage, updateMessage }
 
 // ==================== 全局状态 ====================
 // 所有聊天会话
@@ -249,7 +253,11 @@ export const handleModelChange = async () => {
 
 // 发送消息处理
 export const handleSendMessage = async message => {
-  if (!message.trim() || !isDbReady.value) return
+  // 支持字符串或结构化消息对象
+  const isMessageObject = typeof message === 'object'
+  const messageContent = isMessageObject ? message.content : message
+
+  if (!messageContent.trim() || !isDbReady.value) return
 
   // 设置loading状态
   isLoading.value = true
@@ -266,16 +274,31 @@ export const handleSendMessage = async message => {
   if (!currentChat) return
 
   try {
-    // 添加用户消息
-    const userMsg = { content: message, isUser: true }
+    // 添加用户消息 - 如果message是对象且isUser为true，则使用该对象，否则创建新消息
+    const userMsg = isMessageObject && message.isUser
+      ? message
+      : { content: messageContent, isUser: true }
+
+    // 将用户消息添加到会话
     currentChat.messages.push(userMsg)
     await updateChatTitle(currentChatId.value, userMsg)
     await saveMessage(currentChatId.value, userMsg)
 
-    // 创建AI消息
+    // 如果传入的是完整消息对象，并且不是用户消息（即是AI消息），直接使用
+    if (isMessageObject && !message.isUser) {
+      // 是已经构建好的AI消息对象（如知识库搜索结果）
+      currentChat.messages.push(message)
+      currentChat.lastUpdated = Date.now()
+      await saveMessage(currentChatId.value, message)
+      await saveChatSession(currentChat)
+      isLoading.value = false
+      return
+    }
+
+    // 创建标准AI消息
     const modelId = localStorage.getItem('selectedModel') || 'deepseek-chat'
     const isReasoningModel = modelId === 'deepseek-reasoner'
-    
+
     const aiMsg = reactive({
       content: '',
       isUser: false,
@@ -297,21 +320,21 @@ export const handleSendMessage = async message => {
     // 发送消息到AI
     controller.value = new AbortController()
     await sendMessageToAI(
-      message,
+      messageContent,
       async chunk => {
         if (!isMounted.value) return
-        
+
         if (isReasoningModel) {
           handleReasoningModelChunk(aiMsg, chunk)
         } else {
           aiMsg.content += chunk.content
         }
-        
+
         // 定期更新数据库中的AI消息内容
         try {
           const messageIndex = currentChat.messages.length - 1
           const updates = {}
-          
+
           if (isReasoningModel) {
             if (aiMsg.reasoningContent) updates.reasoningContent = aiMsg.reasoningContent
             if (aiMsg.content) updates.content = aiMsg.content
@@ -319,7 +342,7 @@ export const handleSendMessage = async message => {
           } else {
             if (aiMsg.content) updates.content = aiMsg.content
           }
-          
+
           if (Object.keys(updates).length > 0) {
             await updateMessage(currentChatId.value, messageIndex, updates)
           }
@@ -334,7 +357,7 @@ export const handleSendMessage = async message => {
     if (isReasoningModel) {
       aiMsg.reasoningComplete = true
       aiMsg.content = aiMsg.tempContent || aiMsg.content
-      
+
       // 最终更新数据库
       try {
         const messageIndex = currentChat.messages.length - 1
@@ -351,7 +374,7 @@ export const handleSendMessage = async message => {
     // 最终保存
     currentChat.lastUpdated = Date.now()
     await saveChatSession(currentChat)
-    
+
   } catch (error) {
     handleSendMessageError(error, currentChat)
   } finally {
@@ -395,7 +418,7 @@ const handleSendMessageError = async (error, currentChat) => {
     const aiMsg = currentChat.messages[currentChat.messages.length - 1]
     if (aiMsg && !aiMsg.isUser) {
       aiMsg.content = errorMsg
-      
+
       // 保存错误消息到数据库
       try {
         const messageIndex = currentChat.messages.length - 1
@@ -436,5 +459,8 @@ export function useGlobalMessageHandler() {
     renameChat,
     updateCurrentModel,
     getModelDisplayName,
+    updateMessage, // 添加 updateMessage 到导出列表
+    saveMessage,   // 添加 saveMessage 到导出列表
+    saveChatSession // 添加 saveChatSession 到导出列表
   }
 }

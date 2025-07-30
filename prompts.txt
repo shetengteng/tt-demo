@@ -1,1 +1,9 @@
-删除文档失败: loadFileList is not defined
+graph LR
+U[用户提问] --> V[问题向量化]
+V --> W[向量相似度搜索]
+W --> X[获取Top3知识片段]
+X --> Y[构造Prompt]
+Y --> Z[调用DeepSeek API]
+Z --> 输出回答
+
+基于现有的实现框架，实现上面的流程逻辑

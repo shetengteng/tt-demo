@@ -19,8 +19,9 @@
     <div class="ai-message-content">
       <!-- 添加模型信息显示 -->
       <div class="ai-model-info">
-        {{ msg.model }}
+        {{ msg.model || '知识库搜索' }}
         <span v-if="msg.isReasoningModel" class="reasoning-badge">推理模型</span>
+        <span v-if="msg.isKnowledgeBase" class="knowledge-badge">知识库</span>
       </div>
 
       <!-- 推理模型：显示思考过程 + 最终答案 -->
@@ -65,6 +66,15 @@
           </div>
         </div>
       </template>
+
+      <!-- 知识库搜索 -->
+      <div v-else-if="msg.isKnowledgeBase" class="ai-message knowledge-message">
+        <MarkdownRenderer :content="msg.content" @content-rendered="notifyContentRendered" />
+        <div v-if="isLoading && !msg.content" class="knowledge-searching">
+          <i :class="getIconClass('search')" class="search-icon"></i>
+          <span>正在搜索知识库...</span>
+        </div>
+      </div>
 
       <!-- 普通模型：只显示内容 -->
       <div v-else class="ai-message">
@@ -225,12 +235,39 @@ const notifyContentRendered = () => {
   font-weight: bold;
 }
 
+.knowledge-badge {
+  background-color: #f0f4c3;
+  color: #8bc34a;
+  padding: 2px 6px;
+  border-radius: 10px;
+  font-size: 10px;
+  font-weight: bold;
+}
+
 .ai-message {
   padding: 12px;
   border-radius: 12px;
   max-width: 100%;
   background-color: var(--ai-bg);
   color: var(--ai-text);
+}
+
+.knowledge-message {
+  background-color: var(--ai-bg);
+  border-left: 3px solid #8bc34a;
+}
+
+.knowledge-searching {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--secondary-text-color, #666);
+  font-size: 14px;
+  margin-top: 8px;
+}
+
+.search-icon {
+  color: #8bc34a;
 }
 
 /* 思考过程样式 */

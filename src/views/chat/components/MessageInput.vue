@@ -3,7 +3,7 @@
     <div class="input-row">
       <el-input
         v-model="inputMessage"
-        placeholder="What are the best open oppor"
+        placeholder="输入您的问题..."
         @keyup.enter="sendMessage"
         class="message-input"
       ></el-input>
@@ -11,8 +11,9 @@
     <div class="action-row">
       <el-select
         v-model="selectedModel"
-        placeholder="Select Source"
-        class="source-selector"
+        placeholder="选择模型"
+        class="model-selector"
+        @change="changeModel"
       >
         <el-option
           v-for="model in availableModels"
@@ -21,18 +22,26 @@
           :value="model.value"
         />
       </el-select>
+      
+      <!-- 添加知识库选择 -->
+      <el-select
+        v-model="selectedKnowledgeBase"
+        placeholder="选择知识库(可选)"
+        class="kb-selector"
+        clearable
+      >
+        <el-option
+          v-for="kb in knowledgeBases"
+          :key="kb.id"
+          :label="kb.name"
+          :value="kb.id"
+        />
+      </el-select>
+
       <div class="button-group">
-        <el-button class="action-btn" plain>
-          <i :class="getIconClass('attachment')"></i>
-          Attach
-        </el-button>
-        <el-button class="action-btn" plain>
-          <i :class="getIconClass('mic')"></i>
-          Voice
-        </el-button>
-        <el-button type="primary" class="send-btn" @click="sendMessage">
+        <el-button type="primary" class="send-btn" @click="sendMessage" :loading="isLoading">
           <i :class="getIconClass('send')"></i>
-          Send
+          发送
         </el-button>
       </div>
     </div>
@@ -43,22 +52,105 @@
   import { ref, onMounted } from 'vue'
   import { availableModels } from '@/utils/api.js'
   import { useIcon } from '@/composables/useIcon.js'
+  import { knowledgeSearchService } from '@/services'
+  import { getAllKnowledgeBases } from '@/database'
+  import { ElMessage } from 'element-plus'
 
   const { getIconClass } = useIcon()
   const inputMessage = ref('')
   const selectedModel = ref('')
-  const emit = defineEmits(['send-message', 'change-model'])
+  const selectedKnowledgeBase = ref(null)
+  const knowledgeBases = ref([])
+  const isLoading = ref(false)
+  const emit = defineEmits(['send-message', 'change-model', 'update-message'])
 
-  // 初始化时获取当前选择的模型
-  onMounted(() => {
+  // 初始化时获取当前选择的模型和加载知识库
+  onMounted(async () => {
+    // 加载模型设置
     const savedModel = localStorage.getItem('selectedModel') || 'deepseek-chat'
     selectedModel.value = savedModel
+    
+    // 加载知识库列表
+    try {
+      knowledgeBases.value = await getAllKnowledgeBases()
+    } catch (error) {
+      console.error('加载知识库列表失败:', error)
+    }
   })
 
-  const sendMessage = () => {
+  const sendMessage = async () => {
     if (!inputMessage.value.trim()) return
+    
+    isLoading.value = true
+    
+    try {
+      // 如果选择了知识库，则使用知识库搜索
+      if (selectedKnowledgeBase.value) {
+        await handleKnowledgeSearch()
+      } else {
+        // 否则使用常规模型回答
+        handleNormalModelMessage()
+      }
+    } finally {
+      isLoading.value = false
+    }
+  }
+
+  // 处理常规模型消息
+  const handleNormalModelMessage = () => {
     emit('send-message', inputMessage.value)
     inputMessage.value = ''
+  }
+  
+  // 处理知识库搜索
+  const handleKnowledgeSearch = async () => {
+    // 提交用户消息
+    const userMessage = inputMessage.value
+    emit('send-message', {
+      content: userMessage,
+      isUser: true
+    })
+    
+    // 清空输入框
+    inputMessage.value = ''
+    
+    // 创建中断控制器
+    const controller = new AbortController()
+    
+    // 创建AI回复消息
+    const aiMessage = {
+      content: '',
+      isUser: false,
+      isKnowledgeBase: true,
+      knowledgeBaseId: selectedKnowledgeBase.value
+    }
+    
+    // 提交AI消息（空内容，后续会填充）
+    emit('send-message', aiMessage)
+    
+    try {
+      // 调用知识库搜索服务
+      await knowledgeSearchService.processQuery(
+        userMessage,
+        selectedKnowledgeBase.value,
+        (chunk) => {
+          if (chunk.type === 'content') {
+            // 累积AI响应内容
+            aiMessage.content += chunk.content
+            
+            // 通知父组件更新消息
+            emit('update-message', aiMessage)
+          } else if (chunk.type === 'system' || chunk.type === 'error') {
+            // 可以添加系统消息处理逻辑
+            console.log('系统消息:', chunk.content)
+          }
+        },
+        controller.signal
+      )
+    } catch (error) {
+      console.error('知识库搜索失败:', error)
+      ElMessage.error(`搜索失败: ${error.message}`)
+    }
   }
 
   const changeModel = () => {
@@ -85,7 +177,7 @@
     margin-bottom: 12px;
   }
 
-  .source-selector {
+  .model-selector, .kb-selector {
     width: 160px;
     border-radius: 12px;
   }
@@ -104,19 +196,6 @@
   .button-group {
     display: flex;
     gap: 8px;
-  }
-
-  .action-btn {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    border-radius: 12px;
-    padding: 8px 16px;
-    background-color: transparent;
-  }
-
-  .action-btn i {
-    font-size: 18px;
   }
 
   .send-btn {

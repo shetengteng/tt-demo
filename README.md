@@ -318,20 +318,3 @@ graph TB
       page_number INTEGER         -- 可选：PDF页码
   );
   ```
-
-
-graph LR A[上传文件] --> B[文件解析] B --> C[文本分块] C --> D[生成向量] D --> E[存储到SQLite] E --> F[建立向量索引] 
-基于现有框架，先只针对text文件进行文件解析
-
-langchain - 提供多种文本分块策略
-
-生成向量
-本地模型（推荐用于Electron）：
-@xenova/transformers - 在浏览器/Node.js中运行Transformer模型
-
-  支持向量相似度搜索：
-ml-distance - 各种距离计算（余弦相似度、欧氏距离等）
-在知识库content中的搜索框支持搜索，并返回在当前知识库中的查询结果，在哪些文档中存在，以及对应的位置高亮
-
-
-

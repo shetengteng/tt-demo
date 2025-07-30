@@ -4,7 +4,11 @@
             <MessageList :messages="messages" :is-loading="isLoading" />
         </div>
         <div class="input-wrapper">
-            <MessageInput @send-message="handleSendMessage" @change-model="handleModelChange" />
+            <MessageInput 
+                @send-message="handleSendMessage" 
+                @change-model="handleModelChange"
+                @update-message="handleUpdateMessage"
+            />
         </div>
     </div>
 </template>
@@ -20,7 +24,36 @@ const {
     isLoading,
     handleSendMessage,
     handleModelChange,
+    updateMessage,
+    currentChatId,
+    chatSessions,
+    saveMessage,
+    saveChatSession
 } = useGlobalMessageHandler()
+
+// 处理消息更新
+const handleUpdateMessage = async (updatedMessage) => {
+    if (!currentChatId.value) return
+    
+    const currentChat = chatSessions.value.find(chat => chat.id === currentChatId.value)
+    if (!currentChat) return
+    
+    // 更新最后一条消息
+    const messageIndex = currentChat.messages.length - 1
+    if (messageIndex >= 0 && !currentChat.messages[messageIndex].isUser) {
+        // 更新消息内容
+        currentChat.messages[messageIndex].content = updatedMessage.content
+        
+        // 保存到数据库
+        await updateMessage(currentChatId.value, messageIndex, {
+            content: updatedMessage.content
+        })
+        
+        // 更新会话时间戳
+        currentChat.lastUpdated = Date.now()
+        await saveChatSession(currentChat)
+    }
+}
 </script>
 
 <style scoped>
