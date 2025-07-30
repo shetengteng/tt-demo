@@ -264,8 +264,7 @@
   .selector-container {
     display: flex;
     gap: 12px;
-    margin: 0 auto;
-    justify-content: center;
+    justify-content: flex-start; /* 改为左对齐 */
   }
 
   .model-selector, .kb-selector {
@@ -280,7 +279,7 @@
   .action-row {
     display: flex;
     gap: 12px;
-    justify-content: space-between;
+    justify-content: space-between; /* 保持两端对齐，使按钮组靠右 */
     align-items: center;
   }
 

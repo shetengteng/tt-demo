@@ -55,7 +55,7 @@ export class KnowledgeSearchService {
      */
     async searchKnowledge(query, knowledgeBaseId) {
         // 使用现有的搜索服务
-        const searchResults = await searchService.searchInKnowledgeBase(query, knowledgeBaseId, {
+        const searchResults = await searchService.hybridSearch(query, knowledgeBaseId, {
             limit: this.maxTopResults * 2, // 获取更多结果再筛选
             similarityThreshold: 0.2,      // 降低阈值以获得更多潜在结果
             includeContent: true,

@@ -83,13 +83,19 @@ const loadKnowledgeBases = async () => {
     try {
         loading.value = true
         const dbKnowledgeBases = await getAllKnowledgeBases()
-        const formattedKnowledgeBases = dbKnowledgeBases.map(kb => ({
-            id: kb.id.toString(),
-            name: kb.name,
-            description: kb.description,
-            fileCount: 0, // 暂时设为0，后续可以计算
-            lastUpdated: formatDate(kb.updatedAt),
-        }))
+        const formattedKnowledgeBases = []
+
+        // 为每个知识库获取文件数量
+        for (const kb of dbKnowledgeBases) {
+            const documents = await getDocumentsByKnowledgeBaseId(kb.id)
+            formattedKnowledgeBases.push({
+                id: kb.id.toString(),
+                name: kb.name,
+                description: kb.description,
+                fileCount: documents.length,  // 使用实际的文档数量
+                lastUpdated: formatDate(kb.updatedAt),
+            })
+        }
 
         knowledgeBases.value = formattedKnowledgeBases
 
