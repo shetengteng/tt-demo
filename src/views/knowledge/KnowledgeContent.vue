@@ -69,57 +69,13 @@
         </div>
 
         <!-- 文件列表区域 -->
-        <div class="file-list-section">
-          <div class="file-list-header">
-            <h4>文件列表</h4>
-            <el-button type="text" size="small" @click="refreshFileList">
-              <i class="ri-refresh-line"></i>
-              刷新
-            </el-button>
-          </div>
-
-          <div class="file-list">
-            <el-empty v-if="filteredFiles.length === 0" description="暂无文件">
-            </el-empty>
-
-            <el-menu v-else :default-active="selectedFile" @select="handleFileSelect">
-              <el-menu-item v-for="file in filteredFiles" :key="file.id" :index="file.id" class="file-item">
-                <div class="file-item-content">
-                  <div class="file-icon">
-                    <i :class="getFileIcon(file.type)"></i>
-                  </div>
-                  <div class="file-info">
-                    <div class="file-name">{{ file.name }}</div>
-                    <div class="file-meta">
-                      <span>{{ file.size }}</span>
-                      <span>{{ file.uploadTime }}</span>
-                      <span v-if="file.chunkCount">{{ file.chunkCount }} 分块</span>
-                    </div>
-                  </div>
-                  <div class="file-actions">
-                    <el-dropdown @command="handleFileAction" trigger="click" @click.stop>
-                      <span class="el-dropdown-link">
-                        <i class="ri-more-2-line menu-dots"></i>
-                      </span>
-                      <template #dropdown>
-                        <el-dropdown-menu>
-                          <el-dropdown-item :command="`preview-${file.id}`">
-                            <i class="ri-eye-line menu-icon"></i>
-                            <span>预览</span>
-                          </el-dropdown-item>
-                          <el-dropdown-item :command="`delete-${file.id}`" divided>
-                            <i class="ri-delete-bin-line menu-icon delete-icon"></i>
-                            <span class="delete-text">删除</span>
-                          </el-dropdown-item>
-                        </el-dropdown-menu>
-                      </template>
-                    </el-dropdown>
-                  </div>
-                </div>
-              </el-menu-item>
-            </el-menu>
-          </div>
-        </div>
+        <KnowledgeDocumentList
+          :documents="filteredFiles"
+          :selectedDocument="selectedFile"
+          @select="handleFileSelect"
+          @action="handleFileAction"
+          @refresh="refreshFileList"
+        />
       </div>
     </div>
 
@@ -140,6 +96,7 @@ import { ref, computed } from 'vue'
 import { useGlobalKnowledge } from '@/composables/useGlobalKnowledge'
 import KnowledgeSearchDialog from './components/KnowledgeSearchDialog.vue'
 import DocumentPreviewDialog from './components/DocumentPreviewDialog.vue'
+import KnowledgeDocumentList from './components/KnowledgeDocumentList.vue'
 
 // 使用全局知识库状态管理
 const {
@@ -165,22 +122,6 @@ const showSearchDialog = ref(false)
 // 方法
 const handleFileSelect = index => {
   selectFile(index)
-}
-
-const getFileIcon = type => {
-  const iconMap = {
-    pdf: 'ri-file-pdf-line',
-    docx: 'ri-file-word-line',
-    txt: 'ri-file-text-line',
-    md: 'ri-markdown-line',
-    js: 'ri-braces-line',
-    ts: 'ri-braces-line',
-    vue: 'ri-vuejs-line',
-    css: 'ri-css3-line',
-    html: 'ri-html5-line',
-    json: 'ri-brackets-line',
-  }
-  return iconMap[type] || 'ri-file-line'
 }
 
 // 处理文件上传（Element UI 回调）
@@ -334,161 +275,21 @@ const handleSearchResultSelected = (result) => {
 
 
 
-.file-list-section {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-}
-
-.file-list-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 15px;
-}
-
-.file-list-header h4 {
-  margin: 0;
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--text-color, #333);
-}
-
-.file-list {
-  flex: 1;
-  overflow-y: auto;
-  min-height: 0;
-  /* 确保flex子元素可以正确收缩 */
-}
-
-.file-list .el-menu {
-  border: none;
-  background: transparent;
-}
-
-.file-list .el-menu-item {
-  height: auto;
-  line-height: 1.4;
-  padding: 0;
-  margin: 0 0 5px 0;
-  border-radius: 8px;
-}
-
-.file-list .el-menu-item:hover {
-  background-color: var(--hover-bg-color, #f5f5f5);
-}
-
-.file-list .el-menu-item.is-active {
-  background-color: var(--fill-color-light, #f5f7fa);
-  color: var(--text-color, #333);
-}
-
-.file-list .el-menu-item.is-active .file-name,
-.file-list .el-menu-item.is-active .file-meta {
-  color: var(--text-color, #333);
-}
-
-.file-item {
-  margin: 0 0 5px 0;
-  border-radius: 8px;
-  height: auto;
-  min-height: 50px;
-  padding: 10px 16px;
-}
-
-.file-item-content {
-  display: flex;
-  align-items: flex-start;
-  gap: 12px;
-  width: 100%;
-}
-
-.file-icon {
-  font-size: 20px;
-  color: var(--primary-color, #4a82f0);
-  width: 24px;
-  text-align: center;
-  flex-shrink: 0;
-  margin-top: 2px;
-}
-
-.file-info {
-  flex: 1;
-  min-width: 0;
-  /* 防止文本溢出 */
-}
-
-.file-name {
-  font-weight: 500;
-  color: var(--text-color, #333);
-  margin-bottom: 4px;
-  font-size: 14px;
-  line-height: 1.4;
-  word-wrap: break-word;
-  overflow-wrap: break-word;
-}
-
-.file-meta {
-  font-size: 12px;
-  color: var(--secondary-text-color, #999);
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
-  line-height: 1.3;
-}
-
-.file-actions {
-  opacity: 0;
-  transition: opacity 0.2s;
-  display: flex;
-  gap: 5px;
-  flex-shrink: 0;
-  align-items: center;
-}
-
-.file-item:hover .file-actions {
-  opacity: 1;
-}
-
-.menu-dots {
-  color: var(--secondary-text-color, #999);
-  font-size: 16px;
-  padding: 4px;
-  cursor: pointer;
-}
-
-.menu-icon {
-  margin-right: 6px;
-  font-size: 14px;
-}
-
-.delete-text {
-  color: #ff4d4f;
-}
-
-.delete-icon {
-  color: #ff4d4f;
-}
-
 /* 自定义滚动条样式 */
-.knowledge-content-body::-webkit-scrollbar,
-.file-list::-webkit-scrollbar {
+.knowledge-content-body::-webkit-scrollbar {
   width: 6px;
 }
 
-.knowledge-content-body::-webkit-scrollbar-track,
-.file-list::-webkit-scrollbar-track {
+.knowledge-content-body::-webkit-scrollbar-track {
   background-color: transparent;
 }
 
-.knowledge-content-body::-webkit-scrollbar-thumb,
-.file-list::-webkit-scrollbar-thumb {
+.knowledge-content-body::-webkit-scrollbar-thumb {
   background-color: var(--border-color, #d0d0d0);
   border-radius: 3px;
 }
 
-.knowledge-content-body::-webkit-scrollbar-thumb:hover,
-.file-list::-webkit-scrollbar-thumb:hover {
+.knowledge-content-body::-webkit-scrollbar-thumb:hover {
   background-color: var(--secondary-text-color, #999);
 }
 </style>
