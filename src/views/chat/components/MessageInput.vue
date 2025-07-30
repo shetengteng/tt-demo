@@ -48,10 +48,6 @@
         </el-button>
       </div>
     </div>
-    <!-- 显示当前使用的知识库 -->
-    <div class="current-info" v-if="activeKnowledgeBaseName">
-      <span>正在使用知识库: {{ activeKnowledgeBaseName }}</span>
-    </div>
   </div>
 </template>
 
