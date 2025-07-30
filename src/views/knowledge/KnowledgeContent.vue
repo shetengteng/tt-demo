@@ -4,9 +4,14 @@
     <div class="knowledge-content-header">
       <div class="knowledge-title">
         <h2>{{ currentKnowledgeBase?.name || '选择知识库' }}</h2>
-        <el-tag v-if="currentKnowledgeBase" type="info" size="small">
-          {{ currentKnowledgeBase.fileCount }} 个文件
-        </el-tag>
+        <div class="knowledge-info" v-if="currentKnowledgeBase">
+          <el-tag type="info" size="small">
+            {{ currentKnowledgeBase.fileCount }} 个文件
+          </el-tag>
+          <div class="knowledge-description" v-if="currentKnowledgeBase.description">
+            {{ currentKnowledgeBase.description }}
+          </div>
+        </div>
       </div>
     </div>
 
@@ -152,8 +157,8 @@ const getFileIcon = type => {
 
 .knowledge-title {
   display: flex;
-  align-items: center;
-  gap: 10px;
+  flex-direction: column;
+  gap: 8px;
 }
 
 .knowledge-title h2 {
@@ -161,6 +166,20 @@ const getFileIcon = type => {
   font-size: 20px;
   font-weight: 600;
   color: var(--text-color, #333);
+}
+
+.knowledge-info {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.knowledge-description {
+  color: var(--secondary-text-color, #666);
+  font-size: 14px;
+  line-height: 1.4;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 .knowledge-content-body {

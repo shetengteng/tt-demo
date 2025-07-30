@@ -2,7 +2,7 @@
   <div class="knowledge-list-panel">
     <!-- 知识库列表头部 -->
     <div class="knowledge-list-header">
-      <el-button class="new-knowledge-button" @click="createKnowledgeBase">
+      <el-button class="new-knowledge-button" @click="showCreateDialog">
         <i :class="getIconClass('plus')" class="icon-margin-right"></i>
         <span style="margin-left: 10px">New Knowledge</span>
         <i :class="getIconClass('database')" style="margin-left: 10px"></i>
@@ -20,14 +20,19 @@
           @knowledge-action="handleKnowledgeAction" />
       </el-menu>
     </div>
+
+    <!-- 知识库编辑弹框 -->
+    <KnowledgeEditDialog v-model:visible="dialogVisible" :knowledge-base="editingKnowledgeBase"
+      @submit="handleDialogSubmit" />
   </div>
 </template>
 
 <script setup>
-import { onMounted } from 'vue'
+import { onMounted, ref } from 'vue'
 import { useIcon } from '@/composables/useIcon'
 import { useGlobalKnowledge } from '@/composables/useGlobalKnowledge'
 import KnowledgeItem from './KnowledgeItem.vue'
+import KnowledgeEditDialog from './components/KnowledgeEditDialog.vue'
 
 const { getIconClass } = useIcon()
 
@@ -38,13 +43,55 @@ const {
   loading,
   loadKnowledgeBases,
   createKnowledgeBase,
+  updateKnowledgeBase,
   selectKnowledgeBase,
-  handleKnowledgeAction,
+  handleKnowledgeAction: handleGlobalKnowledgeAction,
 } = useGlobalKnowledge()
+
+// 弹框状态
+const dialogVisible = ref(false)
+const editingKnowledgeBase = ref(null)
 
 // 方法
 const handleKnowledgeBaseSelect = async (id) => {
   await selectKnowledgeBase(id)
+}
+
+// 显示创建弹框
+const showCreateDialog = () => {
+  editingKnowledgeBase.value = null
+  dialogVisible.value = true
+}
+
+// 处理弹框提交
+const handleDialogSubmit = async (data) => {
+  try {
+    if (editingKnowledgeBase.value) {
+      // 编辑模式
+      await updateKnowledgeBase(editingKnowledgeBase.value.id, data)
+    } else {
+      // 创建模式
+      await createKnowledgeBase(data)
+    }
+    dialogVisible.value = false
+  } catch (error) {
+    console.error('操作失败:', error)
+  }
+}
+
+// 处理知识库操作
+const handleKnowledgeAction = async (command) => {
+  const [action, id] = command.split('-')
+
+  if (action === 'edit') {
+    const knowledgeBase = knowledgeBases.value.find(kb => kb.id === id)
+    if (knowledgeBase) {
+      editingKnowledgeBase.value = knowledgeBase
+      dialogVisible.value = true
+    }
+  } else if (action === 'delete') {
+    await handleGlobalKnowledgeAction(command)
+  }
 }
 
 // 生命周期

@@ -1,11 +1,11 @@
-import { ref, computed } from 'vue'
+import { computed, ref } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import {
+    deleteKnowledgeBase as deleteKnowledgeBaseFromDb,
     getAllKnowledgeBases,
+    getDocumentsByKnowledgeBaseId,
     saveKnowledgeBase,
     updateKnowledgeBase,
-    deleteKnowledgeBase as deleteKnowledgeBaseFromDb,
-    getDocumentsByKnowledgeBaseId,
 } from '@/database'
 
 /**
@@ -83,67 +83,43 @@ const loadKnowledgeBases = async () => {
 }
 
 // 创建知识库
-const createKnowledgeBase = async () => {
+const createKnowledgeBase = async (data) => {
     try {
-        const { value: form } = await ElMessageBox.prompt('请输入知识库名称', '创建知识库', {
-            confirmButtonText: '确定',
-            cancelButtonText: '取消',
-            inputPattern: /\S+/,
-            inputErrorMessage: '知识库名称不能为空',
-            inputPlaceholder: '请输入知识库名称',
+        const id = await saveKnowledgeBase({
+            name: data.name,
+            description: data.description,
         })
 
-        if (form) {
-            const id = await saveKnowledgeBase({
-                name: form,
-                description: '',
-            })
-
-            if (id) {
-                ElMessage.success('知识库创建成功')
-                // 重新加载知识库列表
-                await loadKnowledgeBases()
-                return id
-            }
+        if (id) {
+            ElMessage.success('知识库创建成功')
+            // 重新加载知识库列表
+            await loadKnowledgeBases()
+            return id
         }
     } catch (error) {
-        if (error !== 'cancel') {
-            console.error('创建知识库失败:', error)
-            ElMessage.error('创建知识库失败')
-        }
+        console.error('创建知识库失败:', error)
+        ElMessage.error('创建知识库失败')
     }
     return null
 }
 
 // 更新知识库
-const updateKnowledgeBaseHandler = async (id, knowledgeBase) => {
+const updateKnowledgeBaseHandler = async (id, data) => {
     try {
-        const { value: form } = await ElMessageBox.prompt('请输入新的知识库名称', '编辑知识库', {
-            confirmButtonText: '确定',
-            cancelButtonText: '取消',
-            inputPattern: /\S+/,
-            inputErrorMessage: '知识库名称不能为空',
-            inputValue: knowledgeBase.name,
+        const success = await updateKnowledgeBase(parseInt(id), {
+            name: data.name,
+            description: data.description,
         })
 
-        if (form) {
-            const success = await updateKnowledgeBase(parseInt(id), {
-                name: form,
-                description: knowledgeBase.description,
-            })
-
-            if (success) {
-                ElMessage.success('知识库更新成功')
-                // 重新加载知识库列表
-                await loadKnowledgeBases()
-                return true
-            }
+        if (success) {
+            ElMessage.success('知识库更新成功')
+            // 重新加载知识库列表
+            await loadKnowledgeBases()
+            return true
         }
     } catch (error) {
-        if (error !== 'cancel') {
-            console.error('更新知识库失败:', error)
-            ElMessage.error('更新知识库失败')
-        }
+        console.error('更新知识库失败:', error)
+        ElMessage.error('更新知识库失败')
     }
     return false
 }
@@ -228,13 +204,13 @@ const selectFile = (fileId) => {
 // 处理知识库操作
 const handleKnowledgeAction = async (command) => {
     const [action, id] = command.split('-')
-
     if (action === 'edit') {
         const knowledgeBase = knowledgeBases.value.find(kb => kb.id === id)
         if (knowledgeBase) {
             await updateKnowledgeBaseHandler(id, knowledgeBase)
         }
-    } else if (action === 'delete') {
+    }
+    if (action === 'delete') {
         await deleteKnowledgeBase(id)
     }
 }

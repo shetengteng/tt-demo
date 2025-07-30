@@ -3,6 +3,9 @@
     <div class="knowledge-item-content">
       <div class="knowledge-info">
         <div class="knowledge-name">{{ knowledgeBase.name }}</div>
+        <div class="knowledge-description" v-if="knowledgeBase.description">
+          {{ knowledgeBase.description }}
+        </div>
         <div class="knowledge-meta">
           <span>{{ knowledgeBase.fileCount }} 个文件</span>
           <span>{{ knowledgeBase.lastUpdated }}</span>
@@ -45,8 +48,13 @@ const props = defineProps({
   },
 })
 
-// 使用全局知识库状态管理
-const { handleKnowledgeAction } = useGlobalKnowledge()
+// 定义 emit
+const emit = defineEmits(['knowledge-action'])
+
+// 处理知识库操作
+const handleKnowledgeAction = (command) => {
+  emit('knowledge-action', command)
+}
 </script>
 
 <style scoped>
@@ -75,11 +83,24 @@ const { handleKnowledgeAction } = useGlobalKnowledge()
 .knowledge-name {
   font-weight: 500;
   color: var(--text-color, #333);
-  margin-bottom: 6px;
+  margin-bottom: 4px;
   font-size: 14px;
   line-height: 1.4;
   word-wrap: break-word;
   overflow-wrap: break-word;
+}
+
+.knowledge-description {
+  color: var(--secondary-text-color, #666);
+  margin-bottom: 4px;
+  font-size: 12px;
+  line-height: 1.3;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .knowledge-meta {
