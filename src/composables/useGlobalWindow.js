@@ -1,4 +1,4 @@
-import { BrowserWindow, app } from 'electron'
+import { app, BrowserWindow } from 'electron'
 import path from 'path'
 
 // 全局窗口引用
@@ -11,6 +11,9 @@ const createWindow = () => {
     height: 800,
     minWidth: 800,
     minHeight: 600,
+    // 确保窗口有边框、标题和控制按钮
+    title: 'TT Demo', // 设置窗口标题
+    frame: true,
     webPreferences: {
       preload: path.join(app.getAppPath(), 'preload.cjs'),
       nodeIntegration: false,
@@ -55,4 +58,4 @@ export function useGlobalWindow() {
     isWindowExists,
     focusWindow,
   }
-} 
+}

@@ -5,6 +5,7 @@ import fs from 'fs/promises'
 import os from 'os'
 import sqlite3 from 'sqlite3'
 import { SQL } from './sqlConstants.js'
+import { pathToFileURL } from 'url'
 
 // 启用详细日志
 const sqlite = sqlite3.verbose()
@@ -152,7 +153,7 @@ const initDatabase = () => {
     ipcMain.handle('parse-file', async (event, filePath) => {
         try {
             // 动态导入主进程文件解析服务
-            const { fileParserServiceMain } = await import(path.join(process.cwd(), 'src/services/fileParserService.main.js'))
+            const { fileParserServiceMain } = await import(pathToFileURL(path.join(process.cwd(), 'src/services/fileParserService.main.js')).href)
             const result = await fileParserServiceMain.parseFile(filePath)
             return { success: true, data: result }
         } catch (error) {
@@ -172,4 +173,4 @@ const closeDatabase = () => {
 }
 
 // 导出模块
-export { initDatabase, closeDatabase } 
+export { initDatabase, closeDatabase }

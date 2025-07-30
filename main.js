@@ -1,4 +1,4 @@
-import { app } from 'electron'
+import { app, Menu } from 'electron'
 import { closeDatabase, initDatabase } from './src/database/useDb.js'
 import { useGlobalWindow } from './src/composables/useGlobalWindow.js'
 
@@ -14,8 +14,12 @@ if (!gotTheLock) {
   // 初始化数据库和相关IPC处理程序
   initDatabase()
 
-  // 应用准备就绪后创建窗口
-  app.on('ready', createWindow)
+  // 应用准备就绪后创建窗口并隐藏菜单栏
+  app.on('ready', () => {
+    // 隐藏菜单栏
+    Menu.setApplicationMenu(null)
+    createWindow()
+  })
 
   // 所有窗口关闭时退出应用 (macOS除外)
   app.on('window-all-closed', () => {
