@@ -7,7 +7,7 @@
           {{ knowledgeBase.description }}
         </div>
         <div class="knowledge-meta">
-          <span>{{ knowledgeBase.fileCount }} 个文件</span>
+          <span>{{ knowledgeBase.fileCount }} 文件</span>
           <span>{{ knowledgeBase.lastUpdated }}</span>
         </div>
       </div>

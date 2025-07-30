@@ -3,12 +3,14 @@
     <!-- 知识库内容头部 -->
     <div class="knowledge-content-header">
       <div class="knowledge-title">
-        <h2>{{ currentKnowledgeBase?.name || '选择知识库' }}</h2>
-        <div class="knowledge-info" v-if="currentKnowledgeBase">
-          <el-tag type="info" size="small">
-            {{ currentKnowledgeBase.fileCount }} 个文件
+        <div class="title-row">
+          <h2>{{ currentKnowledgeBase?.name || '选择知识库' }}</h2>
+          <el-tag v-if="currentKnowledgeBase" type="info" size="small">
+            {{ currentKnowledgeBase.fileCount }} 文件
           </el-tag>
-          <div class="knowledge-description" v-if="currentKnowledgeBase.description">
+        </div>
+        <div class="knowledge-info" v-if="currentKnowledgeBase?.description">
+          <div class="knowledge-description">
             {{ currentKnowledgeBase.description }}
           </div>
         </div>
@@ -53,7 +55,6 @@
 
           <div class="file-list">
             <el-empty v-if="filteredFiles.length === 0" description="暂无文件">
-              <el-button type="primary" @click="showUploadDialog">上传文件</el-button>
             </el-empty>
 
             <el-menu v-else :default-active="selectedFile" @select="handleFileSelect">
@@ -161,6 +162,12 @@ const getFileIcon = type => {
   gap: 8px;
 }
 
+.title-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
 .knowledge-title h2 {
   margin: 0;
   font-size: 20px;
@@ -172,6 +179,11 @@ const getFileIcon = type => {
   display: flex;
   flex-direction: column;
   gap: 8px;
+}
+
+.knowledge-info .el-tag {
+  width: fit-content;
+  align-self: flex-start;
 }
 
 .knowledge-description {

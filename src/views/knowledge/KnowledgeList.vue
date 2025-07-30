@@ -4,7 +4,7 @@
     <div class="knowledge-list-header">
       <el-button class="new-knowledge-button" @click="showCreateDialog">
         <i :class="getIconClass('plus')" class="icon-margin-right"></i>
-        <span style="margin-left: 10px">New Knowledge</span>
+        <span style="margin-left: 10px">新建知识库</span>
         <i :class="getIconClass('database')" style="margin-left: 10px"></i>
       </el-button>
     </div>
