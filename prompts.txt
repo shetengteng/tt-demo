@@ -1,1 +1,8 @@
-正在使用知识库:  提示可以去除
+打包已完成！
+
+Mac 安装包位置：
+dist_electron/AI Chat Desktop-1.0.0-arm64.dmg
+dist_electron/AI Chat Desktop-1.0.0-arm64-mac.zip
+
+Windows 安装包位置：
+dist_electron/AI Chat Desktop Setup 1.0.0.exe
