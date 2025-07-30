@@ -82,12 +82,6 @@
     <!-- 搜索弹框 -->
     <KnowledgeSearchDialog v-model="showSearchDialog" :knowledgeBaseId="currentKnowledgeBase?.id"
       @result-selected="handleSearchResultSelected" />
-
-    <!-- 文档预览弹框 -->
-    <DocumentPreviewDialog
-      v-model="showPreviewDialog"
-      :document="previewDocumentData"
-    />
   </div>
 </template>
 
@@ -95,7 +89,6 @@
 import { ref, computed } from 'vue'
 import { useGlobalKnowledge } from '@/composables/useGlobalKnowledge'
 import KnowledgeSearchDialog from './components/KnowledgeSearchDialog.vue'
-import DocumentPreviewDialog from './components/DocumentPreviewDialog.vue'
 import KnowledgeDocumentList from './components/KnowledgeDocumentList.vue'
 
 // 使用全局知识库状态管理
@@ -108,8 +101,6 @@ const {
   uploadProgress,
   uploadStatus,
   uploadErrors,
-  showPreviewDialog,
-  previewDocumentData,
   refreshFileList,
   selectFile,
   handleFileAction,

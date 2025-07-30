@@ -13,29 +13,39 @@
         </div>
       </div>
       <div class="file-actions">
-        <el-dropdown @command="handleAction" trigger="click" @click.stop>
-          <span class="el-dropdown-link">
-            <i class="ri-more-2-line menu-dots"></i>
-          </span>
-          <template #dropdown>
-            <el-dropdown-menu>
-              <el-dropdown-item :command="`preview-${document.id}`">
-                <i class="ri-eye-line menu-icon"></i>
-                <span>预览</span>
-              </el-dropdown-item>
-              <el-dropdown-item :command="`delete-${document.id}`" divided>
-                <i class="ri-delete-bin-line menu-icon delete-icon"></i>
-                <span class="delete-text">删除</span>
-              </el-dropdown-item>
-            </el-dropdown-menu>
-          </template>
-        </el-dropdown>
+        <el-button 
+          type="text" 
+          size="small" 
+          @click="openPreview"
+          class="action-button preview-button"
+          title="预览"
+        >
+          <i class="ri-eye-line"></i>
+        </el-button>
+        <el-button 
+          type="text" 
+          size="small" 
+          @click="handleDelete"
+          class="action-button delete-button"
+          title="删除"
+        >
+          <i class="ri-delete-bin-line"></i>
+        </el-button>
       </div>
     </div>
+    
+    <!-- 文档预览弹框 -->
+    <DocumentPreviewDialog
+      v-model="showPreview"
+      :document="document"
+    />
   </el-menu-item>
 </template>
 
 <script setup>
+import { ref } from 'vue'
+import DocumentPreviewDialog from './DocumentPreviewDialog.vue'
+
 // Props
 const props = defineProps({
   document: {
@@ -46,6 +56,9 @@ const props = defineProps({
 
 // Emits
 const emit = defineEmits(['action'])
+
+// 响应式数据
+const showPreview = ref(false)
 
 // 方法
 const getFileIcon = (type) => {
@@ -64,8 +77,12 @@ const getFileIcon = (type) => {
   return iconMap[type] || 'ri-file-line'
 }
 
-const handleAction = (command) => {
-  emit('action', command)
+const openPreview = () => {
+  showPreview.value = true
+}
+
+const handleDelete = () => {
+  emit('action', `delete-${props.document.id}`)
 }
 </script>
 
@@ -123,7 +140,7 @@ const handleAction = (command) => {
   opacity: 0;
   transition: opacity 0.2s;
   display: flex;
-  gap: 5px;
+  gap: 0px;
   flex-shrink: 0;
   align-items: center;
 }
@@ -132,23 +149,37 @@ const handleAction = (command) => {
   opacity: 1;
 }
 
-.menu-dots {
-  color: var(--secondary-text-color, #999);
-  font-size: 16px;
+.action-button {
   padding: 4px;
-  cursor: pointer;
+  margin: 0;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: all 0.2s;
 }
 
-.menu-icon {
-  margin-right: 6px;
-  font-size: 14px;
+.action-button i {
+  font-size: 16px;
 }
 
-.delete-text {
+.preview-button {
+  color: var(--primary-color, #4a82f0);
+}
+
+.preview-button:hover {
+  background-color: rgba(74, 130, 240, 0.1);
+  color: var(--primary-color, #4a82f0);
+}
+
+.delete-button {
   color: #ff4d4f;
 }
 
-.delete-icon {
+.delete-button:hover {
+  background-color: rgba(255, 77, 79, 0.1);
   color: #ff4d4f;
 }
 </style> 

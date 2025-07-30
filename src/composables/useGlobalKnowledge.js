@@ -39,10 +39,6 @@ const searchQuery = ref('')
 const searchType = ref('hybrid') // 'semantic', 'keyword', 'hybrid'
 const showSearchResults = ref(false)
 
-// 预览相关状态
-const showPreviewDialog = ref(false)
-const previewDocumentData = ref(null)
-
 // 计算属性
 const currentKnowledgeBase = computed(() =>
     knowledgeBases.value.find(kb => kb.id === selectedKnowledgeBase.value)
@@ -322,17 +318,6 @@ const selectFile = (fileId) => {
     selectedFile.value = fileId
 }
 
-// 预览文档
-const previewDocument = (file) => {
-    if (!file) {
-        ElMessage.warning('文档信息不存在')
-        return
-    }
-
-    previewDocumentData.value = file
-    showPreviewDialog.value = true
-}
-
 // 删除文档
 const deleteDocument = async (documentId, file) => {
     try {
@@ -356,7 +341,7 @@ const deleteDocument = async (documentId, file) => {
             await deleteChunksByDocId(documentId)
 
             // 刷新文件列表
-            await loadFileList()
+            await loadDocuments(selectedKnowledgeBase.value)
 
             // 如果删除的是当前选中的文件，清除选中状态
             if (selectedFile.value === documentId) {
@@ -394,11 +379,10 @@ const handleFileAction = async (command) => {
     const [action, id] = command.split('-')
     const file = filteredFiles.value.find(f => f.id === id)
 
-    if (action === 'preview') {
-        previewDocument(file)
-    } else if (action === 'delete') {
+    if (action === 'delete') {
         await deleteDocument(id, file)
     }
+    // 预览功能现在由组件内部处理
 }
 
 // 处理文件变化（拖拽上传）
@@ -523,10 +507,6 @@ const globalKnowledgeState = {
     searchType,
     showSearchResults,
 
-    // 预览状态
-    showPreviewDialog,
-    previewDocumentData,
-
     // 方法
     loadKnowledgeBases,
     createKnowledgeBase,
@@ -537,7 +517,6 @@ const globalKnowledgeState = {
     searchFiles,
     refreshFileList,
     selectFile,
-    previewDocument,
     deleteDocument,
     handleKnowledgeAction,
     handleFileAction,
