@@ -6,6 +6,8 @@ import {
     getDocumentsByKnowledgeBaseId,
     saveKnowledgeBase,
     updateKnowledgeBase,
+    deleteDocument as deleteDocumentFromDb,
+    deleteChunksByDocId,
 } from '@/database'
 import { fileProcessingService, searchService } from '@/services'
 
@@ -36,6 +38,10 @@ const searchResults = ref([])
 const searchQuery = ref('')
 const searchType = ref('hybrid') // 'semantic', 'keyword', 'hybrid'
 const showSearchResults = ref(false)
+
+// 预览相关状态
+const showPreviewDialog = ref(false)
+const previewDocumentData = ref(null)
 
 // 计算属性
 const currentKnowledgeBase = computed(() =>
@@ -316,6 +322,59 @@ const selectFile = (fileId) => {
     selectedFile.value = fileId
 }
 
+// 预览文档
+const previewDocument = (file) => {
+    if (!file) {
+        ElMessage.warning('文档信息不存在')
+        return
+    }
+
+    previewDocumentData.value = file
+    showPreviewDialog.value = true
+}
+
+// 删除文档
+const deleteDocument = async (documentId, file) => {
+    try {
+        // 确认删除对话框
+        await ElMessageBox.confirm(
+            `确定要删除文档 "${file?.name || '未知文档'}" 吗？此操作不可撤销。`,
+            '删除确认',
+            {
+                confirmButtonText: '删除',
+                cancelButtonText: '取消',
+                type: 'warning',
+                confirmButtonClass: 'el-button--danger'
+            }
+        )
+
+        // 执行删除操作
+        const deleteSuccess = await deleteDocumentFromDb(documentId)
+
+        if (deleteSuccess) {
+            // 删除相关的文本块
+            await deleteChunksByDocId(documentId)
+
+            // 刷新文件列表
+            await loadFileList()
+
+            // 如果删除的是当前选中的文件，清除选中状态
+            if (selectedFile.value === documentId) {
+                selectedFile.value = ''
+            }
+
+            ElMessage.success('文档删除成功')
+        } else {
+            ElMessage.error('文档删除失败')
+        }
+    } catch (error) {
+        if (error !== 'cancel') {
+            console.error('删除文档时出错:', error)
+            ElMessage.error(`删除文档失败: ${error.message || '未知错误'}`)
+        }
+    }
+}
+
 // 处理知识库操作
 const handleKnowledgeAction = async (command) => {
     const [action, id] = command.split('-')
@@ -331,16 +390,14 @@ const handleKnowledgeAction = async (command) => {
 }
 
 // 处理文件操作
-const handleFileAction = (command) => {
+const handleFileAction = async (command) => {
     const [action, id] = command.split('-')
     const file = filteredFiles.value.find(f => f.id === id)
 
     if (action === 'preview') {
-        // TODO: 实现文件预览逻辑
-        console.log('预览文件:', file)
+        previewDocument(file)
     } else if (action === 'delete') {
-        // TODO: 实现删除文件逻辑
-        console.log('删除文件:', file)
+        await deleteDocument(id, file)
     }
 }
 
@@ -466,6 +523,10 @@ const globalKnowledgeState = {
     searchType,
     showSearchResults,
 
+    // 预览状态
+    showPreviewDialog,
+    previewDocumentData,
+
     // 方法
     loadKnowledgeBases,
     createKnowledgeBase,
@@ -476,6 +537,8 @@ const globalKnowledgeState = {
     searchFiles,
     refreshFileList,
     selectFile,
+    previewDocument,
+    deleteDocument,
     handleKnowledgeAction,
     handleFileAction,
     handleFileChange,

@@ -126,6 +126,12 @@
     <!-- 搜索弹框 -->
     <KnowledgeSearchDialog v-model="showSearchDialog" :knowledgeBaseId="currentKnowledgeBase?.id"
       @result-selected="handleSearchResultSelected" />
+
+    <!-- 文档预览弹框 -->
+    <DocumentPreviewDialog
+      v-model="showPreviewDialog"
+      :document="previewDocumentData"
+    />
   </div>
 </template>
 
@@ -133,6 +139,7 @@
 import { ref, computed } from 'vue'
 import { useGlobalKnowledge } from '@/composables/useGlobalKnowledge'
 import KnowledgeSearchDialog from './components/KnowledgeSearchDialog.vue'
+import DocumentPreviewDialog from './components/DocumentPreviewDialog.vue'
 
 // 使用全局知识库状态管理
 const {
@@ -144,6 +151,8 @@ const {
   uploadProgress,
   uploadStatus,
   uploadErrors,
+  showPreviewDialog,
+  previewDocumentData,
   refreshFileList,
   selectFile,
   handleFileAction,
@@ -370,13 +379,13 @@ const handleSearchResultSelected = (result) => {
 }
 
 .file-list .el-menu-item.is-active {
-  background-color: var(--primary-color, #4a82f0);
-  color: white;
+  background-color: var(--fill-color-light, #f5f7fa);
+  color: var(--text-color, #333);
 }
 
 .file-list .el-menu-item.is-active .file-name,
 .file-list .el-menu-item.is-active .file-meta {
-  color: white;
+  color: var(--text-color, #333);
 }
 
 .file-item {

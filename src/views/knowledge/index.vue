@@ -42,6 +42,6 @@ onMounted(async () => {
 }
 
 :deep(.el-splitter__bar:hover) {
-  background-color: var(--primary-color, #4a82f0);
+  background-color: var(--secondary-text-color, #999);
 }
 </style>
