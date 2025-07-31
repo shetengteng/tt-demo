@@ -3,6 +3,7 @@ import vue from '@vitejs/plugin-vue'
 import path from 'path'
 
 export default defineConfig({
+  base: './', // 使用相对路径以支持 Electron 环境
   plugins: [vue()],
   resolve: {
     alias: {

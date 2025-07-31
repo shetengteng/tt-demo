@@ -28,7 +28,11 @@ const createWindow = () => {
     mainWindow.loadURL('http://localhost:5173/')
     mainWindow.webContents.openDevTools() // 在开发模式下自动打开开发者工具
   } else {
-    mainWindow.loadFile(path.join(app.getAppPath(), 'dist', 'index.html'))
+    // 确保在打包和未打包环境中都能正确加载文件
+    const indexPath = app.isPackaged
+      ? path.join(process.resourcesPath, 'dist', 'index.html')
+      : path.join(app.getAppPath(), 'dist', 'index.html')
+    mainWindow.loadFile(indexPath)
   }
 
   // 窗口关闭时清除引用

@@ -17,3 +17,4 @@ yarn-error.log*
 *.sw?
 package-lock.json
 /dist_electron/
+/dist_electron_new/

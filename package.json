@@ -13,7 +13,8 @@
     "build": "vite build",
     "build:electron": "vite build && electron-builder",
     "build:mac": "vite build && electron-builder --mac",
-    "build:win": "vite build && electron-builder --win"
+    "build:win": "vite build && electron-builder --win",
+    "build:win-dir": "vite build && electron-builder --win --dir"
   },
   "keywords": [
     "ai",
@@ -58,7 +59,7 @@
     "appId": "com.aichat.desktop",
     "productName": "AI Chat Desktop",
     "directories": {
-      "output": "dist_electron"
+      "output": "dist_electron_new"
     },
     "mac": {
       "category": "public.app-category.productivity",
@@ -82,7 +83,14 @@
     "files": [
       "dist/**/*",
       "main.js",
-      "preload.cjs"
+      "preload.cjs",
+      "src/**/*"
+    ],
+    "extraResources": [
+      {
+        "from": "dist",
+        "to": "dist"
+      }
     ]
   }
 }
